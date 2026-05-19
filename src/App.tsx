@@ -1,10 +1,10 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AppShell } from "./components/layouts/AppShell";
 import { ProfileSelectorPage } from "./pages/ProfileSelectorPage";
+import { UploadPage } from "./pages/UploadPage";
 
-// Placeholder pages — will be built page by page
+// Placeholder pages — built page by page
 const DashboardPage = () => <ComingSoon title="Dashboard" />;
-const UploadPage = () => <ComingSoon title="Upload" />;
 const TransactionsPage = () => <ComingSoon title="Transactions" />;
 const InsightsPage = () => <ComingSoon title="Insights" />;
 
@@ -15,6 +15,7 @@ function ComingSoon({ title }: { title: string }) {
         style={{
           fontFamily: "var(--font-display)",
           color: "var(--color-text-2)",
+          fontSize: "var(--text-2xl)",
         }}
       >
         {title} — coming soon
@@ -26,10 +27,8 @@ function ComingSoon({ title }: { title: string }) {
 export function App() {
   return (
     <Routes>
-      {/* Profile selector — public, no shell */}
       <Route path="/" element={<ProfileSelectorPage />} />
 
-      {/* App shell — requires active user */}
       <Route element={<AppShell />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadPage />} />
@@ -37,7 +36,6 @@ export function App() {
         <Route path="/insights" element={<InsightsPage />} />
       </Route>
 
-      {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
