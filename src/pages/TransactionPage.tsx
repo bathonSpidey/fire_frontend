@@ -41,7 +41,8 @@ export function TransactionsPage() {
   const summary = useMemo(() => {
     let income = 0;
     let expenses = 0;
-    for (const tx of transactions) {
+    // Exclude receipt items — their parent bank transaction already counts
+    for (const tx of transactions.filter((t) => !t.is_receipt_item)) {
       const amt = parseFloat(tx.amount);
       if (tx.transaction_type === "credit") income += amt;
       else expenses += amt;

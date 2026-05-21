@@ -5,6 +5,7 @@ import { UploadPage } from "./pages/UploadPage";
 import { TransactionsPage } from "./pages/TransactionPage";
 import { TransactionDetailPage } from "./pages/TransactionDetailPage";
 import { ItemsPage } from "./pages/ItemsPage";
+import { BanksPage } from "./pages/BanksPage";
 
 const DashboardPage = () => <ComingSoon title="Dashboard" />;
 const InsightsPage = () => <ComingSoon title="Insights" />;
@@ -35,6 +36,7 @@ export function App() {
         <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/transactions/:id" element={<TransactionDetailPage />} />
         <Route path="/items" element={<ItemsPage />} />
+        <Route path="/banks" element={<BanksPage />} />
         <Route path="/insights" element={<InsightsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

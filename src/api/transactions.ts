@@ -21,6 +21,19 @@ export const transactionsApi = {
   getItems: (transactionId: string): Promise<Transaction[]> =>
     get(`/transactions/${transactionId}/items`),
 
+  getTransferTransactions: (transactionId: string): Promise<Transaction[]> =>
+    get(`/transactions/${transactionId}/transfer-transactions`),
+
+  listTransfers: (userId: string): Promise<Transaction[]> =>
+    get(`/transactions/transfers/by-user?user_id=${userId}`),
+
+  attachTransfer: (transactionId: string, accountName: string, file: File): Promise<unknown> => {
+    const form = new FormData()
+    form.append('account_name', accountName)
+    form.append('file', file)
+    return postForm(`/transactions/${transactionId}/attach-transfer`, form)
+  },
+
   attachReceipt: (transactionId: string, file: File): Promise<Transaction[]> => {
     const form = new FormData()
     form.append('file', file)

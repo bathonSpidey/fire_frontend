@@ -47,7 +47,7 @@ export interface UploadResponse {
 
 // ── Transactions ──────────────────────────────────────────────────────────────
 
-export type TransactionType = 'debit' | 'credit'
+export type TransactionType = 'debit' | 'credit' | 'transfer'
 
 export type TransactionCategory =
   | 'groceries'
@@ -79,6 +79,8 @@ export interface Transaction {
   parent_transaction_id: string | null
   receipt_document_id: string | null
   is_receipt_item: boolean
+  transfer_account_name: string | null
+  transfer_document_id: string | null
 }
 
 export interface PatchTransactionRequest {

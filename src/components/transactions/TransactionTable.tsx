@@ -7,7 +7,7 @@ import { Badge } from "../ui/Badge";
 import { EmptyState } from "../ui/Feedback";
 import { EditTransactionModal } from "./EditTransactionModal";
 import { AttachReceiptModal } from "./AttachReceiptModal";
-
+import { AttachTransferModal } from "./AttachTransferModal";
 import type { Filters } from "./TransactionFilters";
 
 interface TransactionTableProps {
@@ -22,11 +22,13 @@ export function TransactionTable({
   const navigate = useNavigate();
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [attaching, setAttaching] = useState<Transaction | null>(null);
+  const [attachingTransfer, setAttachingTransfer] =
+    useState<Transaction | null>(null);
   const [showReceiptItems, setShowReceiptItems] = useState<Set<string>>(
     new Set(),
   );
 
-  // Only show top-level transactions by default
+  // Only show top-level transactions, apply display filters
   const topLevel = transactions.filter((tx) => {
     if (tx.is_receipt_item) return false;
     if (
@@ -54,7 +56,7 @@ export function TransactionTable({
     );
   }
 
-  // Group receipt items by parent
+  // Build receipt items map
   const receiptItems = new Map<string, Transaction[]>();
   for (const tx of transactions) {
     if (tx.is_receipt_item && tx.parent_transaction_id) {
@@ -87,7 +89,7 @@ export function TransactionTable({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 140px 120px 72px",
+            gridTemplateColumns: "1fr 140px 120px 88px",
             padding: "var(--space-2) var(--space-4)",
             background: "var(--color-surface-2)",
             borderBottom: "1px solid var(--color-border)",
@@ -111,6 +113,7 @@ export function TransactionTable({
 
         {grouped.map(({ date, rows }) => (
           <div key={date}>
+            {/* Date group header */}
             <div
               style={{
                 padding: "var(--space-2) var(--space-4)",
@@ -140,6 +143,7 @@ export function TransactionTable({
                     isExpanded={expanded}
                     onEdit={() => setEditing(tx)}
                     onAttach={() => setAttaching(tx)}
+                    onAttachTransfer={() => setAttachingTransfer(tx)}
                     onViewDetail={() => navigate(`/transactions/${tx.id}`)}
                     onToggleItems={
                       items.length > 0
@@ -155,12 +159,12 @@ export function TransactionTable({
                         key={item.id}
                         style={{
                           display: "grid",
-                          gridTemplateColumns: "1fr 140px 120px 72px",
+                          gridTemplateColumns: "1fr 140px 120px 88px",
                           alignItems: "center",
                           padding:
                             "var(--space-2) var(--space-4) var(--space-2) var(--space-10)",
                           borderBottom:
-                            j < items.length - 1 || !isLast
+                            j < items.length - 1
                               ? "1px solid var(--color-border)"
                               : "none",
                           background: "rgba(245,158,11,0.03)",
@@ -213,6 +217,12 @@ export function TransactionTable({
           onClose={() => setAttaching(null)}
         />
       )}
+      {attachingTransfer && (
+        <AttachTransferModal
+          transaction={attachingTransfer}
+          onClose={() => setAttachingTransfer(null)}
+        />
+      )}
     </>
   );
 }
@@ -227,6 +237,7 @@ function TransactionRow({
   isExpanded,
   onEdit,
   onAttach,
+  onAttachTransfer,
   onViewDetail,
   onToggleItems,
 }: {
@@ -237,6 +248,7 @@ function TransactionRow({
   isExpanded: boolean;
   onEdit: () => void;
   onAttach: () => void;
+  onAttachTransfer: () => void;
   onViewDetail: () => void;
   onToggleItems?: () => void;
 }) {
@@ -248,7 +260,7 @@ function TransactionRow({
       onMouseLeave={() => setHovered(false)}
       style={{
         display: "grid",
-        gridTemplateColumns: "1fr 140px 120px 72px",
+        gridTemplateColumns: "1fr 140px 120px 88px",
         alignItems: "center",
         padding: "var(--space-3) var(--space-4)",
         borderBottom: isLast ? "none" : "1px solid var(--color-border)",
@@ -284,6 +296,28 @@ function TransactionRow({
               📎
             </span>
           )}
+          {tx.transfer_document_id && (
+            <span
+              title={`Statement: ${tx.transfer_account_name}`}
+              style={{ fontSize: "0.7rem", opacity: 0.7, flexShrink: 0 }}
+            >
+              🏦
+            </span>
+          )}
+          {tx.transaction_type === "transfer" && (
+            <span
+              style={{
+                fontSize: "10px",
+                color: "var(--color-info)",
+                background: "rgba(59,130,246,0.1)",
+                padding: "1px 5px",
+                borderRadius: "999px",
+                flexShrink: 0,
+              }}
+            >
+              {tx.transfer_account_name ?? "transfer"}
+            </span>
+          )}
         </div>
         {tx.merchant && (
           <p
@@ -317,20 +351,20 @@ function TransactionRow({
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",
-          gap: "4px",
+          gap: "2px",
         }}
       >
-        {/* Receipt toggle — always visible when receipt attached */}
+        {/* Receipt expand — always visible when attached */}
         {onToggleItems && (
           <ActionBtn
             onClick={onToggleItems}
             title={isExpanded ? "Hide items" : `Show ${receiptItemCount} items`}
-            style={{ opacity: 1, color: "var(--color-primary)" }}
+            style={{ color: "var(--color-primary)", opacity: 1 }}
           >
             {isExpanded ? "▲" : "▼"}
           </ActionBtn>
         )}
-        {/* View detail page */}
+        {/* View detail */}
         <ActionBtn
           onClick={onViewDetail}
           title="View details"
@@ -341,7 +375,7 @@ function TransactionRow({
         >
           →
         </ActionBtn>
-        {/* Attach receipt — only on debits */}
+        {/* Attach receipt — debits only */}
         {tx.transaction_type === "debit" && (
           <ActionBtn
             onClick={onAttach}
@@ -354,6 +388,26 @@ function TransactionRow({
             🧾
           </ActionBtn>
         )}
+        {/* Attach transfer statement — debits and transfers */}
+        {(tx.transaction_type === "debit" ||
+          tx.transaction_type === "transfer") &&
+          !tx.is_receipt_item && (
+            <ActionBtn
+              onClick={onAttachTransfer}
+              title={
+                tx.transfer_document_id
+                  ? "Replace statement"
+                  : "Attach bank statement"
+              }
+              style={{
+                opacity: hovered ? 1 : 0,
+                transition: "opacity var(--duration-fast)",
+              }}
+            >
+              🏦
+            </ActionBtn>
+          )}
+        {/* Edit */}
         <ActionBtn
           onClick={onEdit}
           title="Edit"
@@ -368,6 +422,8 @@ function TransactionRow({
     </div>
   );
 }
+
+// ── Action button ─────────────────────────────────────────────────────────────
 
 function ActionBtn({
   children,
@@ -385,8 +441,8 @@ function ActionBtn({
       onClick={onClick}
       title={title}
       style={{
-        width: "24px",
-        height: "24px",
+        width: "22px",
+        height: "22px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -395,8 +451,8 @@ function ActionBtn({
         borderRadius: "var(--radius-sm)",
         color: "var(--color-text-2)",
         cursor: "pointer",
-        fontSize: "0.85rem",
-        transition: "background var(--duration-fast)",
+        fontSize: "0.8rem",
+        flexShrink: 0,
         ...style,
       }}
     >
