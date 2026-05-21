@@ -2,10 +2,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AppShell } from "./components/layouts/AppShell";
 import { ProfileSelectorPage } from "./pages/ProfileSelectorPage";
 import { UploadPage } from "./pages/UploadPage";
+import { TransactionsPage } from "./pages/TransactionPage";
+import { TransactionDetailPage } from "./pages/TransactionDetailPage";
+import { ItemsPage } from "./pages/ItemsPage";
 
-// Placeholder pages — built page by page
 const DashboardPage = () => <ComingSoon title="Dashboard" />;
-const TransactionsPage = () => <ComingSoon title="Transactions" />;
 const InsightsPage = () => <ComingSoon title="Insights" />;
 
 function ComingSoon({ title }: { title: string }) {
@@ -28,14 +29,14 @@ export function App() {
   return (
     <Routes>
       <Route path="/" element={<ProfileSelectorPage />} />
-
       <Route element={<AppShell />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/transactions" element={<TransactionsPage />} />
+        <Route path="/transactions/:id" element={<TransactionDetailPage />} />
+        <Route path="/items" element={<ItemsPage />} />
         <Route path="/insights" element={<InsightsPage />} />
       </Route>
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

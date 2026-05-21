@@ -1,5 +1,7 @@
 import { NavLink } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveUser } from "../../store/useUserStore";
+import { configApi } from "../../api/config";
 
 interface NavItem {
   to: string;
@@ -11,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/dashboard", icon: "◈", label: "Dashboard" },
   { to: "/upload", icon: "↑", label: "Upload" },
   { to: "/transactions", icon: "≡", label: "Transactions" },
+  { to: "/items", icon: "🧾", label: "Items" },
   { to: "/insights", icon: "◉", label: "Insights" },
 ];
 
@@ -129,6 +132,67 @@ export function Sidebar() {
           </span>
         </div>
       )}
+      {/* Model picker */}
+      <ModelPicker />
     </aside>
+  );
+}
+
+function ModelPicker() {
+  const queryClient = useQueryClient();
+  const { data: config } = useQuery({
+    queryKey: ["config"],
+    queryFn: configApi.get,
+  });
+  const mutation = useMutation({
+    mutationFn: (model: string) => configApi.setModel(model),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["config"] }),
+  });
+
+  if (!config) return null;
+
+  return (
+    <div
+      style={{
+        padding: "var(--space-3) var(--space-4)",
+        borderTop: "1px solid var(--color-border)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: "10px",
+          color: "var(--color-text-3)",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          marginBottom: "var(--space-2)",
+        }}
+      >
+        Vision model
+      </p>
+      <select
+        value={config.gemini_model}
+        onChange={(e) => mutation.mutate(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "4px 8px",
+          background: "var(--color-surface-2)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "var(--radius-sm)",
+          color: mutation.isPending
+            ? "var(--color-text-3)"
+            : "var(--color-text-2)",
+          fontFamily: "var(--font-mono)",
+          fontSize: "11px",
+          cursor: "pointer",
+          outline: "none",
+        }}
+      >
+        {config.gemini_available_models.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }

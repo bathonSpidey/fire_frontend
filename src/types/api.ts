@@ -76,6 +76,9 @@ export interface Transaction {
   merchant: string | null
   notes: string | null
   is_recurring: boolean
+  parent_transaction_id: string | null
+  receipt_document_id: string | null
+  is_receipt_item: boolean
 }
 
 export interface PatchTransactionRequest {

@@ -5,26 +5,25 @@ import { useActiveUser } from "../../store/useUserStore";
 export function AppShell() {
   const user = useActiveUser();
 
-  // Redirect to profile selector if no user is active
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
+  if (!user) return <Navigate to="/" replace />;
 
   return (
     <div
       style={{
         display: "flex",
         height: "100vh",
-        overflow: "hidden",
+        overflow: "hidden", // prevent the shell itself from scrolling
         background: "var(--color-bg)",
       }}
     >
       <Sidebar />
 
+      {/* main is THE scroll container for all pages */}
       <main
         style={{
           flex: 1,
-          overflow: "auto",
+          overflowY: "auto", // scroll happens here
+          overflowX: "hidden",
           display: "flex",
           flexDirection: "column",
         }}

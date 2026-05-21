@@ -1,4 +1,4 @@
-import { del, get, patch } from './client'
+import { del, get, patch, postForm } from './client'
 import type { PatchTransactionRequest, Transaction } from '../types/api'
 
 export const transactionsApi = {
@@ -17,4 +17,13 @@ export const transactionsApi = {
 
   delete: (id: string): Promise<void> =>
     del(`/transactions/${id}`),
+
+  getItems: (transactionId: string): Promise<Transaction[]> =>
+    get(`/transactions/${transactionId}/items`),
+
+  attachReceipt: (transactionId: string, file: File): Promise<Transaction[]> => {
+    const form = new FormData()
+    form.append('file', file)
+    return postForm(`/transactions/${transactionId}/attach-receipt`, form)
+  },
 }
