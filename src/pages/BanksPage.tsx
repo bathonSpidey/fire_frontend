@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { transactionsApi } from "../api/transactions";
 import { useActiveUser } from "../store/useUserStore";
 import { PageHeader } from "../components/layouts/PageHeader";
@@ -23,99 +23,38 @@ export function BanksPage() {
   });
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  // Fetch all transactions — we need transfers + their investment transactions
-  const { data: allTransactions = [], isLoading } = useQuery({
-    queryKey: ["transactions", user?.id],
-    queryFn: () => transactionsApi.list(user!.id),
+  // Fetch only transfer transactions — dedicated endpoint, no filtering needed
+  const { data: allTransfers = [], isLoading } = useQuery({
+    queryKey: ["transfers", user?.id],
+    queryFn: () => transactionsApi.listTransfers(user!.id),
     enabled: !!user,
+    staleTime: 0,
   });
 
-  // Group transfer transactions by bank account
-  const bankGroups = useMemo(() => {
-    const monthStr = `${period.year}-${String(period.month).padStart(2, "0")}`;
+  // Filter to selected month, only those with a statement attached
+  const monthStr = `${period.year}-${String(period.month).padStart(2, "0")}`;
+  const transfers = allTransfers.filter((tx) => tx.date.startsWith(monthStr));
 
-    // Transfers in selected month
-    const transfers = allTransactions.filter(
-      (tx) =>
-        tx.transaction_type === "transfer" &&
-        tx.transfer_account_name &&
-        tx.date.startsWith(monthStr),
-    );
-
-    // Investment transactions grouped by document
-    const investmentsByDoc = new Map<string, Transaction[]>();
-    for (const tx of allTransactions) {
-      if (!tx.is_receipt_item && tx.document_id) {
-        // Find if this transaction belongs to a transfer document
-        const parentTransfer = transfers.find(
-          (t) => t.transfer_document_id === tx.document_id,
-        );
-        if (parentTransfer) {
-          const group = investmentsByDoc.get(tx.document_id) ?? [];
-          group.push(tx);
-          investmentsByDoc.set(tx.document_id, group);
-        }
-      }
-    }
-
-    // Group by account name
-    const byBank = new Map<
-      string,
-      {
-        accountName: string;
-        transfers: Transaction[];
-        transactions: Transaction[];
-        totalIn: number;
-        totalOut: number;
-      }
-    >();
-
-    for (const transfer of transfers) {
-      const name = transfer.transfer_account_name!;
-      const existing = byBank.get(name) ?? {
-        accountName: name,
-        transfers: [],
-        transactions: [],
-        totalIn: 0,
-        totalOut: 0,
-      };
-      existing.transfers.push(transfer);
-
-      if (transfer.transfer_document_id) {
-        const invTxs =
-          investmentsByDoc.get(transfer.transfer_document_id) ?? [];
-        existing.transactions.push(...invTxs);
-        for (const tx of invTxs) {
-          if (tx.transaction_type === "credit")
-            existing.totalIn += parseFloat(tx.amount);
-          else existing.totalOut += parseFloat(tx.amount);
-        }
-      }
-      byBank.set(name, existing);
-    }
-
-    return [...byBank.values()].sort((a, b) =>
-      a.accountName.localeCompare(b.accountName),
-    );
-  }, [allTransactions, period]);
-
-  const totalTransferred = useMemo(
-    () =>
-      bankGroups.reduce(
-        (sum, g) =>
-          sum + g.transfers.reduce((s, t) => s + parseFloat(t.amount), 0),
-        0,
-      ),
-    [bankGroups],
+  console.log("[BanksPage] allTransfers count:", allTransfers.length);
+  console.log(
+    "[BanksPage] allTransfers full:",
+    JSON.stringify(allTransfers, null, 2),
   );
+  console.log("[BanksPage] monthStr:", monthStr);
+  console.log("[BanksPage] filtered transfers:", transfers.length);
 
-  function toggle(name: string) {
+  function toggle(id: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
-      next.has(name) ? next.delete(name) : next.add(name);
+      next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   }
+
+  const totalTransferred = transfers.reduce(
+    (s, t) => s + parseFloat(t.amount),
+    0,
+  );
 
   return (
     <div
@@ -123,7 +62,7 @@ export function BanksPage() {
     >
       <PageHeader
         title="Banks"
-        subtitle={`Investment & transfer accounts`}
+        subtitle="Investment & transfer accounts"
         action={<MonthPicker value={period} onChange={setPeriod} />}
       />
 
@@ -135,82 +74,6 @@ export function BanksPage() {
           gap: "var(--space-5)",
         }}
       >
-        {/* Summary */}
-        {bankGroups.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "var(--space-4)",
-            }}
-          >
-            <Card accent style={{ borderLeftColor: "var(--color-info)" }}>
-              <p
-                style={{
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-text-3)",
-                  fontWeight: 600,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  marginBottom: "var(--space-2)",
-                }}
-              >
-                Transferred
-              </p>
-              <Amount
-                value={totalTransferred.toFixed(2)}
-                type="debit"
-                size="xl"
-              />
-            </Card>
-            <Card accent style={{ borderLeftColor: "var(--color-primary)" }}>
-              <p
-                style={{
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-text-3)",
-                  fontWeight: 600,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  marginBottom: "var(--space-2)",
-                }}
-              >
-                Accounts
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-3xl)",
-                  fontWeight: 700,
-                  color: "var(--color-primary)",
-                }}
-              >
-                {bankGroups.length}
-              </p>
-            </Card>
-            <Card accent style={{ borderLeftColor: "var(--color-success)" }}>
-              <p
-                style={{
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-text-3)",
-                  fontWeight: 600,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  marginBottom: "var(--space-2)",
-                }}
-              >
-                Investments
-              </p>
-              <Amount
-                value={bankGroups
-                  .reduce((s, g) => s + g.totalOut, 0)
-                  .toFixed(2)}
-                type="debit"
-                size="xl"
-              />
-            </Card>
-          </div>
-        )}
-
         {isLoading ? (
           <div
             style={{
@@ -221,60 +84,143 @@ export function BanksPage() {
           >
             <LoadingSpinner />
           </div>
-        ) : bankGroups.length === 0 ? (
+        ) : transfers.length === 0 ? (
           <EmptyState
             icon="🏦"
             title="No transfers this month"
-            description="Mark a debit transaction as a transfer and attach the investment bank statement to track it here."
+            description="Mark a debit as a transfer and attach the investment bank statement."
           />
         ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-3)",
-            }}
-          >
-            {bankGroups.map((group) => (
-              <BankCard
-                key={group.accountName}
-                group={group}
-                isExpanded={expanded.has(group.accountName)}
-                onToggle={() => toggle(group.accountName)}
-                onViewTransfer={(id) => navigate(`/transactions/${id}`)}
-              />
-            ))}
-          </div>
+          <>
+            {/* Summary */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "var(--space-4)",
+              }}
+            >
+              <Card accent style={{ borderLeftColor: "var(--color-info)" }}>
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-text-3)",
+                    fontWeight: 600,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    marginBottom: "var(--space-2)",
+                  }}
+                >
+                  Transferred
+                </p>
+                <Amount
+                  value={totalTransferred.toFixed(2)}
+                  type="debit"
+                  size="xl"
+                />
+              </Card>
+              <Card accent style={{ borderLeftColor: "var(--color-primary)" }}>
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-text-3)",
+                    fontWeight: 600,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    marginBottom: "var(--space-2)",
+                  }}
+                >
+                  Accounts
+                </p>
+                <p
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "var(--text-3xl)",
+                    fontWeight: 700,
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  {new Set(transfers.map((t) => t.transfer_account_name)).size}
+                </p>
+              </Card>
+            </div>
+
+            {/* One card per transfer */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--space-3)",
+              }}
+            >
+              {transfers.map((transfer) => (
+                <TransferCard
+                  key={transfer.id}
+                  transfer={transfer}
+                  isExpanded={expanded.has(transfer.id)}
+                  onToggle={() => toggle(transfer.id)}
+                  onViewTransfer={() =>
+                    navigate(`/transactions/${transfer.id}`)
+                  }
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
   );
 }
 
-// ── Bank card ─────────────────────────────────────────────────────────────────
+// ── Single transfer card — fetches its own transactions ───────────────────────
 
-function BankCard({
-  group,
+function TransferCard({
+  transfer,
   isExpanded,
   onToggle,
   onViewTransfer,
 }: {
-  group: {
-    accountName: string;
-    transfers: Transaction[];
-    transactions: Transaction[];
-    totalIn: number;
-    totalOut: number;
-  };
+  transfer: Transaction;
   isExpanded: boolean;
   onToggle: () => void;
-  onViewTransfer: (id: string) => void;
+  onViewTransfer: () => void;
 }) {
-  const transferTotal = group.transfers.reduce(
-    (s, t) => s + parseFloat(t.amount),
-    0,
-  );
-  const hasTransactions = group.transactions.length > 0;
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => transactionsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["transfer-transactions", transfer.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["transfers"] });
+    },
+  });
+  // Fetch investment transactions for this specific transfer via dedicated endpoint
+  const { data: transactions = [], isLoading } = useQuery({
+    queryKey: ["transfer-transactions", transfer.id],
+    queryFn: async () => {
+      console.log(
+        "[TransferCard] fetching transactions for transfer.id:",
+        transfer.id,
+      );
+      console.log(
+        "[TransferCard] transfer.transfer_document_id:",
+        transfer.transfer_document_id,
+      );
+      const result = await transactionsApi.getTransferTransactions(transfer.id);
+      console.log("[TransferCard] got", result.length, "transactions:", result);
+      return result;
+    },
+    enabled: isExpanded,
+    staleTime: 0,
+  });
+
+  const totalIn = transactions
+    .filter((t) => t.transaction_type === "credit")
+    .reduce((s, t) => s + parseFloat(t.amount), 0);
+  const totalOut = transactions
+    .filter((t) => t.transaction_type === "debit")
+    .reduce((s, t) => s + parseFloat(t.amount), 0);
 
   return (
     <div
@@ -305,15 +251,15 @@ function BankCard({
           style={{
             color: "var(--color-info)",
             fontSize: "0.8rem",
-            transform: isExpanded ? "rotate(180deg)" : "rotate(0)",
-            transition: "transform var(--duration-base)",
             flexShrink: 0,
+            transform: isExpanded ? "rotate(180deg)" : "none",
+            transition: "transform var(--duration-base)",
           }}
         >
           ▼
         </span>
 
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
               display: "flex",
@@ -321,159 +267,127 @@ function BankCard({
               gap: "var(--space-2)",
             }}
           >
-            <span style={{ fontSize: "1.1rem" }}>🏦</span>
-            <p
-              style={{
-                fontWeight: 700,
-                fontSize: "var(--text-base)",
-                color: "var(--color-text)",
-              }}
-            >
-              {group.accountName}
+            <span>🏦</span>
+            <p style={{ fontWeight: 700, color: "var(--color-text)" }}>
+              {transfer.transfer_account_name ?? "Investment Account"}
             </p>
-            <Badge variant="info">
-              {group.transfers.length} transfer
-              {group.transfers.length !== 1 ? "s" : ""}
-            </Badge>
-            {hasTransactions && (
-              <Badge variant="default">
-                {group.transactions.length} transactions
-              </Badge>
-            )}
+            <Badge variant="info">statement</Badge>
           </div>
           <div
             style={{
               display: "flex",
               gap: "var(--space-3)",
               marginTop: "var(--space-1)",
+              alignItems: "center",
             }}
           >
-            {group.transfers.map((t) => (
-              <span
-                key={t.id}
-                style={{
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-text-3)",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                {t.date}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <Amount value={transferTotal.toFixed(2)} type="debit" size="md" />
-      </div>
-
-      {/* Expanded — show transfers + investment transactions */}
-      {isExpanded && (
-        <div>
-          {/* Source transfers */}
-          <div
-            style={{
-              padding: "var(--space-3) var(--space-5)",
-              borderBottom: "1px solid var(--color-border)",
-              background: "rgba(59,130,246,0.03)",
-            }}
-          >
-            <p
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--text-xs)",
+                color: "var(--color-text-3)",
+              }}
+            >
+              {transfer.date}
+            </span>
+            <span
               style={{
                 fontSize: "var(--text-xs)",
                 color: "var(--color-text-3)",
-                fontWeight: 600,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                marginBottom: "var(--space-2)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
-              Source transfers
-            </p>
-            {group.transfers.map((t) => (
-              <div
-                key={t.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "var(--space-2) 0",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "var(--space-3)",
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "var(--text-xs)",
-                      color: "var(--color-text-3)",
-                    }}
-                  >
-                    {t.date}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "var(--text-sm)",
-                      color: "var(--color-text-2)",
-                    }}
-                  >
-                    {t.description}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "var(--space-3)",
-                    alignItems: "center",
-                  }}
-                >
-                  <Amount value={t.amount} type="debit" size="sm" />
-                  <button
-                    onClick={() => onViewTransfer(t.id)}
-                    style={{
-                      background: "none",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "var(--radius-sm)",
-                      color: "var(--color-text-3)",
-                      cursor: "pointer",
-                      fontSize: "var(--text-xs)",
-                      padding: "2px 8px",
-                    }}
-                  >
-                    →
-                  </button>
-                </div>
-              </div>
-            ))}
+              {transfer.description}
+            </span>
           </div>
+        </div>
 
-          {/* Investment transactions */}
-          {hasTransactions ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--space-3)",
+            flexShrink: 0,
+          }}
+        >
+          <Amount value={transfer.amount} type="debit" size="md" />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewTransfer();
+            }}
+            style={{
+              background: "none",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-sm)",
+              color: "var(--color-text-3)",
+              cursor: "pointer",
+              fontSize: "var(--text-xs)",
+              padding: "2px 8px",
+            }}
+          >
+            →
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded transactions */}
+      {isExpanded && (
+        <div>
+          {isLoading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "var(--space-8)",
+              }}
+            >
+              <LoadingSpinner size={20} />
+            </div>
+          ) : transactions.length === 0 ? (
+            <div
+              style={{
+                padding: "var(--space-5)",
+                textAlign: "center",
+                color: "var(--color-text-3)",
+                fontSize: "var(--text-sm)",
+              }}
+            >
+              {transfer.transfer_document_id
+                ? "No transactions found in statement"
+                : "⚠️ Statement not attached — use 🏦 button on the transaction to attach one"}
+            </div>
+          ) : (
             <div>
+              {/* Column header */}
               <div
                 style={{
+                  display: "grid",
+                  gridTemplateColumns: "90px 1fr 130px 100px",
                   padding: "var(--space-2) var(--space-5)",
                   background: "var(--color-surface-2)",
                   borderBottom: "1px solid var(--color-border)",
                 }}
               >
-                <p
-                  style={{
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-text-3)",
-                    fontWeight: 600,
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Investment transactions
-                </p>
+                {["Date", "Description", "Category", "Amount"].map((h) => (
+                  <span
+                    key={h}
+                    style={{
+                      fontSize: "var(--text-xs)",
+                      color: "var(--color-text-3)",
+                      fontWeight: 600,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {h}
+                  </span>
+                ))}
               </div>
-              {group.transactions.map((tx, i) => (
+
+              {transactions.map((tx, i) => (
                 <div
                   key={tx.id}
                   style={{
@@ -482,7 +396,7 @@ function BankCard({
                     alignItems: "center",
                     padding: "var(--space-3) var(--space-5)",
                     borderBottom:
-                      i < group.transactions.length - 1
+                      i < transactions.length - 1
                         ? "1px solid var(--color-border)"
                         : "none",
                   }}
@@ -510,17 +424,53 @@ function BankCard({
                   <Badge variant="muted">
                     {CATEGORY_ICONS[tx.category]} {CATEGORY_LABELS[tx.category]}
                   </Badge>
-                  <div style={{ textAlign: "right" }}>
+                  <div
+                    style={{
+                      textAlign: "right",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      gap: "var(--space-2)",
+                    }}
+                  >
                     <Amount
                       value={tx.amount}
                       type={tx.transaction_type}
                       size="sm"
                       showSign
                     />
+                    <button
+                      onClick={() => {
+                        if (
+                          confirm(`Delete "${tx.description.slice(0, 40)}..."?`)
+                        )
+                          deleteMutation.mutate(tx.id);
+                      }}
+                      title="Delete"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--color-danger)",
+                        opacity: 0.5,
+                        fontSize: "0.75rem",
+                        padding: "0 var(--space-1)",
+                        flexShrink: 0,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = "0.5";
+                      }}
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
               ))}
-              {/* Summary */}
+
+              {/* Totals */}
               <div
                 style={{
                   display: "flex",
@@ -531,7 +481,7 @@ function BankCard({
                   borderTop: "1px solid var(--color-border)",
                 }}
               >
-                {group.totalIn > 0 && (
+                {totalIn > 0 && (
                   <div
                     style={{
                       display: "flex",
@@ -548,13 +498,13 @@ function BankCard({
                       in
                     </span>
                     <Amount
-                      value={group.totalIn.toFixed(2)}
+                      value={totalIn.toFixed(2)}
                       type="credit"
                       size="sm"
                     />
                   </div>
                 )}
-                {group.totalOut > 0 && (
+                {totalOut > 0 && (
                   <div
                     style={{
                       display: "flex",
@@ -571,25 +521,13 @@ function BankCard({
                       out
                     </span>
                     <Amount
-                      value={group.totalOut.toFixed(2)}
+                      value={totalOut.toFixed(2)}
                       type="debit"
                       size="sm"
                     />
                   </div>
                 )}
               </div>
-            </div>
-          ) : (
-            <div
-              style={{
-                padding: "var(--space-6)",
-                textAlign: "center",
-                color: "var(--color-text-3)",
-                fontSize: "var(--text-sm)",
-              }}
-            >
-              No statement attached — click 🏦 on the source transfer to attach
-              one
             </div>
           )}
         </div>

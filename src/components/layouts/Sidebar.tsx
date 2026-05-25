@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/upload", icon: "↑", label: "Upload" },
   { to: "/transactions", icon: "≡", label: "Transactions" },
   { to: "/items", icon: "🧾", label: "Items" },
+  { to: "/banks", icon: "🏦", label: "Banks" },
   { to: "/insights", icon: "◉", label: "Insights" },
 ];
 

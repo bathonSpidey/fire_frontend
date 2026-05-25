@@ -79,6 +79,7 @@ export interface Transaction {
   parent_transaction_id: string | null
   receipt_document_id: string | null
   is_receipt_item: boolean
+  is_investment_item: boolean
   transfer_account_name: string | null
   transfer_document_id: string | null
 }

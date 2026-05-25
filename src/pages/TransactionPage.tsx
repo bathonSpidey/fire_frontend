@@ -50,6 +50,16 @@ export function TransactionsPage() {
     return { income, expenses, net: income - expenses };
   }, [transactions]);
 
+  const filtered = useMemo(() => {
+    return transactions.filter((tx) => {
+      if (filters.type !== "all" && tx.transaction_type !== filters.type)
+        return false;
+      if (filters.category !== "all" && tx.category !== filters.category)
+        return false;
+      return true;
+    });
+  }, [transactions, filters]);
+
   const counts = {
     income: transactions.filter((t) => t.transaction_type === "credit").length,
     expense: transactions.filter((t) => t.transaction_type === "debit").length,
@@ -126,7 +136,7 @@ export function TransactionsPage() {
           <ErrorMessage message="Failed to load transactions." />
         ) : (
           <TransactionTable
-            transactions={transactions}
+            transactions={transactions.filter((t) => !t.is_investment_item)}
             displayFilters={filters}
           />
         )}

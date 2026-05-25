@@ -6,8 +6,8 @@ import { TransactionsPage } from "./pages/TransactionPage";
 import { TransactionDetailPage } from "./pages/TransactionDetailPage";
 import { ItemsPage } from "./pages/ItemsPage";
 import { BanksPage } from "./pages/BanksPage";
+import { DashboardPage } from "./pages/DashboardPage";
 
-const DashboardPage = () => <ComingSoon title="Dashboard" />;
 const InsightsPage = () => <ComingSoon title="Insights" />;
 
 function ComingSoon({ title }: { title: string }) {

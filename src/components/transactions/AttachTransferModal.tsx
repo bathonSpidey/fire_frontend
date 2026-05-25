@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { transactionsApi } from "../../api/transactions";
 import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/Feedback";
@@ -26,6 +27,7 @@ export function AttachTransferModal({
   onClose,
 }: AttachTransferModalProps) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [accountName, setAccountName] = useState(
@@ -33,25 +35,100 @@ export function AttachTransferModal({
   );
   const [customName, setCustomName] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [done, setDone] = useState(false);
 
   const effectiveName = accountName === "Other" ? customName : accountName;
 
   const mutation = useMutation({
     mutationFn: () =>
       transactionsApi.attachTransfer(transaction.id, effectiveName, file!),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    onSuccess: async () => {
+      // Force refetch all transaction queries — not just invalidate
+      await queryClient.refetchQueries({ queryKey: ["transactions"] });
+      await queryClient.refetchQueries({ queryKey: ["transactions-all"] });
       queryClient.invalidateQueries({
         queryKey: ["transaction", transaction.id],
       });
-      queryClient.invalidateQueries({ queryKey: ["transfers"] });
-      onClose();
+      setDone(true);
     },
   });
 
   function handleFile(f: File) {
     setFile(f);
     mutation.reset();
+    setDone(false);
+  }
+
+  if (done) {
+    return (
+      <div
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.7)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 100,
+          padding: "var(--space-4)",
+        }}
+      >
+        <div
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-xl)",
+            padding: "var(--space-6)",
+            width: "100%",
+            maxWidth: "420px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-5)",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <span style={{ fontSize: "2.5rem" }}>✅</span>
+          <div>
+            <p
+              style={{
+                fontWeight: 600,
+                color: "var(--color-success)",
+                marginBottom: "var(--space-2)",
+              }}
+            >
+              Statement attached to {effectiveName}
+            </p>
+            <p
+              style={{
+                fontSize: "var(--text-sm)",
+                color: "var(--color-text-2)",
+              }}
+            >
+              Transactions extracted successfully
+            </p>
+          </div>
+          <div
+            style={{ display: "flex", gap: "var(--space-3)", width: "100%" }}
+          >
+            <Button
+              variant="primary"
+              fullWidth
+              onClick={() => {
+                onClose();
+                navigate("/banks");
+              }}
+            >
+              View in Banks →
+            </Button>
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -106,7 +183,7 @@ export function AttachTransferModal({
                 color: "var(--color-text-2)",
               }}
             >
-              Link the investment account statement to this transfer
+              Link an investment account statement to this transfer
             </p>
           </div>
           <button
