@@ -12,6 +12,13 @@
     transition: var(--transition);
 }
 
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    /* Space between logo and nav links */
+}
+
 .brand {
     display: flex;
     align-items: center;
@@ -19,11 +26,40 @@
     font-weight: 700;
     font-size: 1.125rem;
     letter-spacing: -0.02em;
+    text-decoration: none;
+    color: var(--text-primary);
 }
 
 .logoIcon {
     color: var(--primary);
     font-size: 1.25rem;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.navLink {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    transition: var(--transition-all);
+}
+
+.navLink:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-raised);
+}
+
+.activeLink {
+    color: var(--primary-text);
+    background-color: var(--primary-subtle);
+    font-weight: 600;
 }
 
 .navActions {
