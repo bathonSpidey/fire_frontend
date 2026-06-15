@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Reset and Core Configuration */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,33 +11,66 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Light Theme Tokens */
   --background: #fafafa;
   --surface: #ffffff;
+  --surface-raised: #f4f4f5;
   --text-primary: #09090b;
   --text-secondary: #71717a;
   --border: #e4e4e7;
+  --border-strong: #d4d4d8;
 
   --primary: #10b981;
-  /* Emerald Green for Budget */
   --primary-hover: #059669;
+  --primary-subtle: rgba(16, 185, 129, 0.08);
+  --primary-border: rgba(16, 185, 129, 0.3);
+  --primary-text: #065f46;
+
+  --success: #10b981;
+  --success-subtle: rgba(16, 185, 129, 0.08);
+  --success-border: rgba(16, 185, 129, 0.3);
+  --success-text: #065f46;
+
+  --danger: #ef4444;
+  --danger-subtle: rgba(239, 68, 68, 0.08);
+  --danger-border: rgba(239, 68, 68, 0.3);
+  --danger-text: #991b1b;
+
   --ai-purple: #6366f1;
-  /* Indigo for future AI layer */
 
   --radius: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
   --transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  --transition-all: all 0.2s ease;
 }
 
 [data-theme='dark'] {
-  /* Dark Theme Tokens */
   --background: #09090b;
   --surface: #18181b;
+  --surface-raised: #27272a;
   --text-primary: #f4f4f5;
   --text-secondary: #a1a1aa;
   --border: #27272a;
+  --border-strong: #3f3f46;
 
   --primary: #34d399;
   --primary-hover: #10b981;
+  --primary-subtle: rgba(52, 211, 153, 0.1);
+  --primary-border: rgba(52, 211, 153, 0.3);
+  --primary-text: #6ee7b7;
+
+  --success: #34d399;
+  --success-subtle: rgba(52, 211, 153, 0.1);
+  --success-border: rgba(52, 211, 153, 0.3);
+  --success-text: #6ee7b7;
+
+  --danger: #f87171;
+  --danger-subtle: rgba(248, 113, 113, 0.1);
+  --danger-border: rgba(248, 113, 113, 0.3);
+  --danger-text: #fca5a5;
 }
 
 body {
