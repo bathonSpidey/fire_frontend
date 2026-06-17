@@ -2,8 +2,9 @@ import React from "react";
 import { useManageStatements } from "../hooks/useManageStatements";
 import { DateNavigator } from "./DateNavigator";
 import { StatementAccordion } from "./StatementAccordion";
-import styles from "../styles/StatementManage.module.css";
+import { MonthlyStatsContainer } from "../../monthly-stats/components/MonthlyStatsContainer";
 import { UploadPage } from "../../statement-upload/components/UploadPage";
+import styles from "../styles/StatementManage.module.css";
 
 export const StatementManagePage: React.FC = () => {
   const {
@@ -30,37 +31,51 @@ export const StatementManagePage: React.FC = () => {
         onYearChange={setYear}
       />
 
+      {/* Fully decoupled stats engine layer */}
+      <MonthlyStatsContainer month={month} year={year} />
+
       {loading && (
         <div className={styles.infoMessage}>Loading statements...</div>
       )}
 
       {error && <div className={styles.errorMessage}>{error}</div>}
 
-      {!loading && statements.length > 0 && (
+      {!loading && !error && (
         <>
-          <div className={styles.tabsContainer}>
-            {statements.map((s) => (
-              <button
-                key={s.bank}
-                className={`${styles.tab} ${activeBank === s.bank ? styles.activeTab : ""}`}
-                onClick={() => setActiveBank(s.bank)}
-              >
-                {s.bank}
-              </button>
-            ))}
-          </div>
+          {statements.length > 0 ? (
+            <>
+              <div className={styles.tabsContainer}>
+                {statements.map((s) => (
+                  <button
+                    key={s.bank}
+                    className={`${styles.tab} ${activeBank === s.bank ? styles.activeTab : ""}`}
+                    onClick={() => setActiveBank(s.bank)}
+                  >
+                    {s.bank}
+                  </button>
+                ))}
+              </div>
 
-          {selectedStatement && (
-            <StatementAccordion statement={selectedStatement} />
+              {selectedStatement && (
+                <StatementAccordion statement={selectedStatement} />
+              )}
+            </>
+          ) : (
+            <div>
+              <div
+                className={styles.infoMessage}
+                style={{ paddingBottom: "16px" }}
+              >
+                No statements found for{" "}
+                <strong>
+                  {month} {year}
+                </strong>
+                .
+              </div>
+              <UploadPage />
+            </div>
           )}
         </>
-      )}
-
-      {!loading && !error && statements.length === 0 && (
-        <div className={styles.infoMessage}>
-          No statements found for {month} {year}.
-          <UploadPage />
-        </div>
       )}
     </div>
   );

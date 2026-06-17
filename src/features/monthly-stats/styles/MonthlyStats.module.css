@@ -1,0 +1,140 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* 4-Column Core KPI Grid */
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .kpiGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.kpiCard {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+.value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.positive {
+    color: var(--success-text);
+}
+
+.negative {
+    color: var(--danger-text);
+}
+
+/* Lower Split View */
+.splitView {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .splitView {
+        grid-template-columns: 1fr;
+    }
+}
+
+.metaCard {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+}
+
+.sectionTitle {
+    font-size: 0.815rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.infoRow:last-child {
+    border-bottom: none;
+}
+
+.infoLabel {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.infoValue {
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Horizontal Progress Bars */
+.categoryList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.categoryItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.categoryMeta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.815rem;
+}
+
+.barTrack {
+    width: 100%;
+    height: 6px;
+    background-color: var(--surface-raised);
+    border-radius: var(--radius-full);
+}
+
+.barFill {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: var(--radius-full);
+}
+
+/* Subtle accent for investment/income categories */
+.accentFill {
+    background-color: var(--ai-purple);
+}
