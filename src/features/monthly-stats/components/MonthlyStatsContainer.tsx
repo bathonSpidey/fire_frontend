@@ -1,6 +1,7 @@
 import React from "react";
 import { useMonthlyStats } from "../hooks/useMonthlyStats";
 import { MonthlyStatsDashboard } from "./MonthlyStatsDashboard";
+import styles from "../styles/MonthlyStats.module.css";
 
 interface ContainerProps {
   month: string;
@@ -11,21 +12,13 @@ export const MonthlyStatsContainer: React.FC<ContainerProps> = ({
   month,
   year,
 }) => {
-  const { stats, loading, error } = useMonthlyStats(month, year);
+  const { stats, previousStats, loading, error } = useMonthlyStats(month, year);
 
-  if (loading)
-    return (
-      <div
-        style={{
-          fontSize: "0.875rem",
-          color: "var(--text-secondary)",
-          padding: "12px 0",
-        }}
-      >
-        Updating metrics...
-      </div>
-    );
+  if (loading) {
+    return <div className={styles.loadingMessage}>Updating metrics...</div>;
+  }
+
   if (error) return null; // Fail silently so it doesn't break the main statement view
 
-  return <MonthlyStatsDashboard stats={stats} />;
+  return <MonthlyStatsDashboard stats={stats} previousStats={previousStats} />;
 };

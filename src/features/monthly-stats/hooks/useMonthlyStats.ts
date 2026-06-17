@@ -1,37 +1,63 @@
-import { useState, useEffect } from 'react';
-import type { MonthlyStatsResponse } from '../types';
+import { useState, useEffect } from "react";
+import type { MonthlyStatsResponse } from "../types";
+import { fetchMonthlyStats } from "../lib/statsApi";
+import { getPreviousMonth } from "../lib/monthMath";
 
-export const useMonthlyStats = (month: string, year: number) => {
+interface UseMonthlyStatsResult {
+  stats: MonthlyStatsResponse | null;
+  previousStats: MonthlyStatsResponse | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export const useMonthlyStats = (
+  month: string,
+  year: number,
+): UseMonthlyStatsResult => {
   const [stats, setStats] = useState<MonthlyStatsResponse | null>(null);
+  const [previousStats, setPreviousStats] =
+    useState<MonthlyStatsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    let isCurrent = true;
+
+    const loadStats = async () => {
       setLoading(true);
       setError(null);
-      const statsUrl = `http://localhost:8000/stats/?month=${month}&year=${year}`;
 
       try {
-        const res = await fetch(statsUrl, { headers: { 'accept': 'application/json' } });
-        
-        if (res.ok) {
-          const data: MonthlyStatsResponse = await res.json();
-          setStats(data);
-        } else {
-          // If a month has no data, it's an empty state rather than a breaking error
-          setStats(null);
-        }
+        const { month: prevMonth, year: prevYear } = getPreviousMonth(
+          month,
+          year,
+        );
+
+        const [currentResult, previousResult] = await Promise.all([
+          fetchMonthlyStats(month, year),
+          fetchMonthlyStats(prevMonth, prevYear),
+        ]);
+
+        if (!isCurrent) return;
+
+        setStats(currentResult);
+        setPreviousStats(previousResult);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch metrics');
+        if (!isCurrent) return;
+        setError(err instanceof Error ? err.message : "Failed to fetch metrics");
         setStats(null);
+        setPreviousStats(null);
       } finally {
-        setLoading(false);
+        if (isCurrent) setLoading(false);
       }
     };
 
-    fetchStats();
+    loadStats();
+
+    return () => {
+      isCurrent = false;
+    };
   }, [month, year]);
 
-  return { stats, loading, error };
+  return { stats, previousStats, loading, error };
 };

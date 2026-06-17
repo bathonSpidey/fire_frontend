@@ -14,3 +14,8 @@ export interface MonthlyStatsResponse {
   fixed_vs_variable_ratio: string;
   categories: Record<string, CategoryStat>;
 }
+
+export interface MonthlyStatsWithTrend {
+  current: MonthlyStatsResponse;
+  previous: MonthlyStatsResponse | null;
+}

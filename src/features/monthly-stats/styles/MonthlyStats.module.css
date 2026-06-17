@@ -5,6 +5,12 @@
     margin-bottom: 24px;
 }
 
+.loadingMessage {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    padding: 12px 0;
+}
+
 /* 4-Column Core KPI Grid */
 .kpiGrid {
     display: grid;
@@ -20,12 +26,12 @@
 
 .kpiCard {
     background-color: var(--surface);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: var(--radius-md);
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .label {
@@ -50,6 +56,35 @@
     color: var(--danger-text);
 }
 
+/* Trend indicator badges */
+.trendBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.trendPositive {
+    color: var(--success-text);
+}
+
+.trendNegative {
+    color: var(--danger-text);
+}
+
+.trendFlat {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.trendCaption {
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-left: 2px;
+}
+
 /* Lower Split View */
 .splitView {
     display: grid;
@@ -65,7 +100,7 @@
 
 .metaCard {
     background-color: var(--surface);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: var(--radius-md);
     padding: 20px;
 }
@@ -83,7 +118,7 @@
     display: flex;
     justify-content: space-between;
     padding: 12px 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
 }
 
 .infoRow:last-child {
@@ -98,6 +133,61 @@
 .infoValue {
     font-weight: 600;
     font-size: 0.875rem;
+}
+
+/* Donut chart */
+.donutWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.donutLegend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.legendDot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.legendLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chartTooltip {
+    background-color: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.8125rem;
+}
+
+.chartTooltipLabel {
+    color: var(--text-secondary);
+}
+
+.chartTooltipValue {
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 /* Horizontal Progress Bars */
@@ -121,6 +211,16 @@
     font-size: 0.815rem;
 }
 
+.categoryName {
+    font-weight: 500;
+}
+
+.emptyListMessage {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    padding: 8px 0;
+}
+
 .barTrack {
     width: 100%;
     height: 6px;
@@ -134,7 +234,8 @@
     border-radius: var(--radius-full);
 }
 
-/* Subtle accent for investment/income categories */
-.accentFill {
+.accentFillIncome {
+    height: 100%;
     background-color: var(--ai-purple);
+    border-radius: var(--radius-full);
 }
