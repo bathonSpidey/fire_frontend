@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useMonthlyInventory } from "../hooks/useMonthlyInventory";
+import { useReceiptUpload } from "../../receipt-upload/hooks/useReceiptUpload";
 import { InventoryStats } from "./InventoryStats";
+import { ReceiptCard } from "./ReceiptCard";
+import { BulkFeedbackPanel } from "./BulkFeedbackPanel";
 import styles from "../styles/MonthlyInventory.module.css";
 
-const MONTHS_MAP = [
+const MONTHS = [
   "",
   "January",
   "February",
@@ -19,6 +22,56 @@ const MONTHS_MAP = [
   "December",
 ];
 
+const ChevronLeft: React.FC = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+
+const ChevronRight: React.FC = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
+
+const UploadIcon: React.FC = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
+
 export const MonthlyInventoryPage: React.FC = () => {
   const {
     month,
@@ -29,134 +82,110 @@ export const MonthlyInventoryPage: React.FC = () => {
     handlePrevMonth,
     handleNextMonth,
   } = useMonthlyInventory();
+  const {
+    uploadMultipleReceipts,
+    loading: uploading,
+    results,
+    clearResults,
+  } = useReceiptUpload();
   const [search, setSearch] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Client-side filtering logic matching input words against item names or categories
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      await uploadMultipleReceipts(e.target.files);
+      e.target.value = "";
+    }
+  };
+
   const filteredReceipts = receipts
-    .map((receipt) => {
-      const matchingItems = receipt.items.filter(
+    .map((receipt) => ({
+      ...receipt,
+      items: receipt.items.filter(
         (item) =>
           item.name.toLowerCase().includes(search.toLowerCase()) ||
           item.category.toLowerCase().includes(search.toLowerCase()),
-      );
-      return { ...receipt, items: matchingItems };
-    })
+      ),
+    }))
     .filter((receipt) => receipt.items.length > 0);
 
   return (
     <div className={styles.container}>
       <div className={styles.navigator}>
-        <button className={styles.navButton} onClick={handlePrevMonth}>
-          ← Previous
+        <button
+          className={styles.navButton}
+          onClick={handlePrevMonth}
+          aria-label="Previous month"
+        >
+          <ChevronLeft />
         </button>
-        <h2 style={{ fontSize: "1.25rem", fontWeight: 700 }}>
-          {MONTHS_MAP[month]} {year}
+        <h2 className={styles.navigatorTitle}>
+          {MONTHS[month]} {year}
         </h2>
-        <button className={styles.navButton} onClick={handleNextMonth}>
-          Next →
+        <button
+          className={styles.navButton}
+          onClick={handleNextMonth}
+          aria-label="Next month"
+        >
+          <ChevronRight />
         </button>
       </div>
 
       {loading && (
-        <div style={{ color: "var(--text-secondary)" }}>
-          Loading smartory inventory logs...
-        </div>
+        <div className={styles.infoMessage}>Loading inventory logs...</div>
       )}
-      {error && <div style={{ color: "var(--danger-text)" }}>{error}</div>}
+      {error && <div className={styles.errorMessage}>{error}</div>}
 
       {!loading && !error && (
         <>
           <InventoryStats receipts={receipts} />
 
-          <input
-            type="text"
-            className={styles.searchBar}
-            placeholder="🔍 Search items or categories inside this month..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div className={styles.searchRow}>
+            <input
+              type="text"
+              className={styles.searchBar}
+              placeholder="Search items or categories..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search inventory items"
+            />
+            <button
+              className={styles.uploadBtn}
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {uploading ? (
+                <>
+                  <span className={styles.spinner} aria-hidden="true" /> Parsing
+                  batch...
+                </>
+              ) : (
+                <>
+                  <UploadIcon /> Upload receipts
+                </>
+              )}
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className={styles.hiddenInput}
+              multiple
+              accept=".pdf,image/*"
+              onChange={handleFileChange}
+            />
+          </div>
+
+          {results.length > 0 && (
+            <BulkFeedbackPanel results={results} onDismiss={clearResults} />
+          )}
 
           {filteredReceipts.length === 0 ? (
-            <div
-              style={{
-                padding: "32px",
-                textAlign: "center",
-                color: "var(--text-secondary)",
-              }}
-            >
-              No matching inventory items found for this timeline slice.
+            <div className={styles.emptyState}>
+              No matching inventory items found for {MONTHS[month]} {year}.
             </div>
           ) : (
             filteredReceipts.map((receipt) => (
-              <div key={receipt.id} className={styles.receiptCard}>
-                <div className={styles.receiptHeader}>
-                  <div>
-                    <span className={styles.storeTitle}>
-                      {receipt.store_name}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                        marginLeft: "12px",
-                      }}
-                    >
-                      {receipt.purchase_date}
-                    </span>
-                  </div>
-                  <div style={{ fontWeight: 600 }}>
-                    {receipt.total_amount.toFixed(2)}€
-                  </div>
-                </div>
-
-                <table className={styles.itemTable}>
-                  <thead>
-                    <tr>
-                      <th>Item Name</th>
-                      <th>Category</th>
-                      <th>Qty</th>
-                      <th>Unit Cost</th>
-                      <th>Storage</th>
-                      <th>Expiry</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {receipt.items.map((item) => (
-                      <tr key={item.id}>
-                        <td style={{ fontWeight: 500 }}>
-                          {item.name} {item.brand ? `(${item.brand})` : ""}
-                        </td>
-                        <td>
-                          <span
-                            className={styles.pill}
-                            style={{ backgroundColor: "var(--surface-raised)" }}
-                          >
-                            {item.category}
-                          </span>
-                        </td>
-                        <td>{item.quantity}</td>
-                        <td>{item.unit_cost.toFixed(2)}€</td>
-                        <td>
-                          <span
-                            className={`${styles.pill} ${item.storage_condition.includes("Cool") ? styles.coolCondition : styles.normalCondition}`}
-                          >
-                            {item.storage_condition}
-                          </span>
-                        </td>
-                        <td
-                          style={{
-                            color: item.date_expiry
-                              ? "var(--text-primary)"
-                              : "var(--text-secondary)",
-                          }}
-                        >
-                          {item.date_expiry ? item.date_expiry : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <ReceiptCard key={receipt.id} receipt={receipt} />
             ))
           )}
         </>

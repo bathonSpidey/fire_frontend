@@ -18,7 +18,6 @@ const ReceiptIcon: React.FC = () => (
     <line x1="8" y1="13" x2="14" y2="13" />
   </svg>
 );
-
 const CheckIcon: React.FC = () => (
   <svg
     width="22"
@@ -32,7 +31,6 @@ const CheckIcon: React.FC = () => (
     <path d="M20 6L9 17l-5-5" />
   </svg>
 );
-
 const AlertIcon: React.FC = () => (
   <svg
     width="16"
@@ -48,7 +46,6 @@ const AlertIcon: React.FC = () => (
     <line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 );
-
 const WarningIcon: React.FC = () => (
   <svg
     width="16"
@@ -64,7 +61,6 @@ const WarningIcon: React.FC = () => (
     <line x1="12" y1="17" x2="12.01" y2="17" />
   </svg>
 );
-
 const LinkIcon: React.FC = () => (
   <svg
     width="12"
@@ -83,18 +79,14 @@ const LinkIcon: React.FC = () => (
 export const ReceiptUploadSection: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { file, loading, error, data, handleFileChange, uploadReceipt } =
-    useReceiptUpload();
-
-  const isDuplicate = data?.status.includes("Duplicate");
+  const { files, loading, error, results, handleFileChange, uploadMultipleReceipts } = useReceiptUpload();
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const dropped = e.dataTransfer.files[0];
-    if (dropped) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFileChange({
-        target: { files: [dropped] },
+        target: { files: e.dataTransfer.files },
       } as unknown as React.ChangeEvent<HTMLInputElement>);
     }
   };
@@ -102,7 +94,7 @@ export const ReceiptUploadSection: React.FC = () => {
   const dropzoneClass = [
     shared.dropzone,
     isDragging ? shared.dropzoneDrag : "",
-    file ? shared.dropzoneHasFile : "",
+    files.length > 0 ? shared.dropzoneHasFile : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -122,12 +114,11 @@ export const ReceiptUploadSection: React.FC = () => {
           >
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
-          Smartory ingestion
+          Smartory Ingestion
         </span>
-        <h2 className={shared.title}>Upload store receipt</h2>
+        <h2 className={shared.title}>Upload store receipts</h2>
         <p className={shared.description}>
-          Scan store receipts (Kaufland, Lidl, etc.) to extract raw items
-          automatically.
+          Scan one or multiple receipts to extract raw items automatically.
         </p>
       </div>
 
@@ -146,31 +137,45 @@ export const ReceiptUploadSection: React.FC = () => {
       >
         <input
           type="file"
+          multiple
           accept=".pdf,image/*"
           className={shared.fileInput}
           ref={fileInputRef}
           onChange={handleFileChange}
         />
         <div
-          className={`${shared.iconWrap} ${file ? shared.iconWrapSuccess : ""}`}
+          className={`${shared.iconWrap} ${files.length > 0 ? shared.iconWrapSuccess : ""}`}
         >
-          {file ? <CheckIcon /> : <ReceiptIcon />}
+          {files.length > 0 ? <CheckIcon /> : <ReceiptIcon />}
         </div>
         <div className={shared.dzContent}>
-          {file ? (
+          {files.length > 0 ? (
             <>
               <div className={`${shared.dzLabel} ${shared.dzLabelSuccess}`}>
-                Receipt ready
+                {files.length} receipt(s) ready
               </div>
-              <div className={shared.fileChip}>{file.name}</div>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px",
+                  marginTop: "6px",
+                }}
+              >
+                {files.map((f, i) => (
+                  <div key={i} className={shared.fileChip}>
+                    {f.name}
+                  </div>
+                ))}
+              </div>
             </>
           ) : (
             <>
               <div className={shared.dzLabel}>
-                Click or drag your receipt PDF or image here
+                Click or drag your receipt PDFs or images here
               </div>
               <div className={shared.dzSub}>
-                Supports .pdf and images up to 20 MB
+                Supports multiple files up to 20 MB each
               </div>
             </>
           )}
@@ -184,15 +189,11 @@ export const ReceiptUploadSection: React.FC = () => {
         </div>
       )}
 
-      <button
-        className={`${shared.button}`}
-        onClick={uploadReceipt}
-        disabled={!file || loading}
-      >
+      <button className={shared.button} onClick={() => uploadMultipleReceipts()} disabled={files.length === 0 || loading}>
         {loading ? (
           <>
             <span className={shared.spinner} aria-hidden="true" /> Processing
-            receipt with AI...
+            batch with AI...
           </>
         ) : (
           <>
@@ -207,57 +208,82 @@ export const ReceiptUploadSection: React.FC = () => {
             >
               <circle cx="12" cy="12" r="10" />
               <path d="M12 8v4l3 3" />
-            </svg>
-            Process receipt
+            </svg>{" "}
+            Process batch
           </>
         )}
       </button>
 
-      {data && isDuplicate && (
-        <div className={styles.warningCard} role="status" aria-live="polite">
-          <div className={styles.warningTitle}>
-            <WarningIcon />
-            {data.status}
-          </div>
-          <div className={styles.warningMeta}>{data.message}</div>
-          <div className={shared.statsRow}>
-            <span className={shared.statPill}>ID: #{data.receipt_id}</span>
-            <span className={shared.statPill}>Merchant: {data.merchant}</span>
-            {data.linked_to_bank_ledger && (
-              <span className={`${shared.statPill} ${shared.statPillAccent}`}>
-                <LinkIcon /> Linked to ledger
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {data && !isDuplicate && (
-        <div className={shared.successCard} role="status" aria-live="polite">
-          <div className={shared.successIcon}>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              aria-hidden="true"
+      {/* Results Feed Stack Container */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          marginTop: "16px",
+        }}
+      >
+        {results.map((data, index) => {
+          const isDuplicate = data.status.includes("Duplicate");
+          return isDuplicate ? (
+            <div
+              key={index}
+              className={styles.warningCard}
+              role="status"
+              aria-live="polite"
             >
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-          </div>
-          <div>
-            <div className={shared.successTitle}>
-              Receipt processed successfully
+              <div className={styles.warningTitle}>
+                <WarningIcon />
+                {data.status}
+              </div>
+              <div className={styles.warningMeta}>{data.message}</div>
+              <div className={shared.statsRow}>
+                <span className={shared.statPill}>ID: #{data.receipt_id}</span>
+                <span className={shared.statPill}>
+                  Merchant: {data.merchant}
+                </span>
+                {data.linked_to_bank_ledger && (
+                  <span
+                    className={`${shared.statPill} ${shared.statPillAccent}`}
+                  >
+                    <LinkIcon /> Linked to ledger
+                  </span>
+                )}
+              </div>
             </div>
-            <div className={shared.successMeta}>
-              Parsed items from {data.merchant} and matched them to your catalog
-              tracking profiles.
+          ) : (
+            <div
+              key={index}
+              className={shared.successCard}
+              role="status"
+              aria-live="polite"
+            >
+              <div className={shared.successIcon}>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  aria-hidden="true"
+                >
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </div>
+              <div>
+                <div className={shared.successTitle}>
+                  Receipt processed successfully
+                </div>
+                <div className={shared.successMeta}>
+                  Parsed items from {data.merchant || "Store"} and matched them
+                  to your catalog tracking profiles.
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 };

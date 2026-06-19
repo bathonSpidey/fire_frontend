@@ -17,20 +17,17 @@ export const InventoryStats: React.FC<StatsProps> = ({ receipts }) => {
   return (
     <div className={styles.statsGrid}>
       <div className={styles.statCard}>
-        <span className={styles.statLabel}>Receipts Cash Total</span>
-        <span className={styles.statValue}>{totalSpent.toFixed(2)}€</span>
+        <span className={styles.statLabel}>Total spent</span>
+        <span className={styles.statValue}>{totalSpent.toFixed(2)} €</span>
       </div>
       <div className={styles.statCard}>
-        <span className={styles.statLabel}>Items Ingested</span>
+        <span className={styles.statLabel}>Items ingested</span>
         <span className={styles.statValue}>{totalItemsCount} units</span>
       </div>
       <div className={styles.statCard}>
-        <span className={styles.statLabel}>Discounts Saved</span>
-        <span
-          className={styles.statValue}
-          style={{ color: "var(--success-text)" }}
-        >
-          {totalDiscount.toFixed(2)}€
+        <span className={styles.statLabel}>Discounts saved</span>
+        <span className={`${styles.statValue} ${styles.statValueSuccess}`}>
+          {totalDiscount.toFixed(2)} €
         </span>
       </div>
     </div>
