@@ -1,0 +1,42 @@
+/*
+ * Receipt upload feature — feature-specific styles only.
+ * Compose these classes alongside src/shared/styles/upload.module.css.
+ * Nothing here should duplicate a class that already exists in shared.
+ */
+
+.sectionSeparator {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ── Warning / duplicate state ── */
+.warningCard {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--warning-subtle, #fdf6ec);
+    border: 0.5px solid var(--warning-border, rgba(230, 162, 60, 0.35));
+}
+
+.warningTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--warning-text, #e6a23c);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.warningMeta {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+}

@@ -1,10 +1,9 @@
 import React, { useRef, useState } from "react";
-import { useStatementUpload } from "../hooks/useStatementUpload";
-import { ReceiptUploadSection } from "../../receipt-upload/components/ReceiptUploadSection";
-import pageStyles from "../styles/UploadPage.module.css";
+import { useReceiptUpload } from "../hooks/useReceiptUpload";
 import shared from "../../../shared/styles/upload.module.css";
+import styles from "../styles/ReceiptUpload.module.css";
 
-const FileIcon: React.FC = () => (
+const ReceiptIcon: React.FC = () => (
   <svg
     width="22"
     height="22"
@@ -14,8 +13,9 @@ const FileIcon: React.FC = () => (
     strokeWidth="2"
     aria-hidden="true"
   >
-    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
+    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z" />
+    <line x1="8" y1="9" x2="16" y2="9" />
+    <line x1="8" y1="13" x2="14" y2="13" />
   </svg>
 );
 
@@ -49,21 +49,53 @@ const AlertIcon: React.FC = () => (
   </svg>
 );
 
-export const UploadPage: React.FC = () => {
+const WarningIcon: React.FC = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    aria-hidden="true"
+  >
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
+const LinkIcon: React.FC = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    aria-hidden="true"
+  >
+    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+  </svg>
+);
+
+export const ReceiptUploadSection: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { file, loading, error, data, handleFileChange, uploadFile } =
-    useStatementUpload();
+  const { file, loading, error, data, handleFileChange, uploadReceipt } =
+    useReceiptUpload();
+
+  const isDuplicate = data?.status.includes("Duplicate");
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const dropped = e.dataTransfer.files[0];
     if (dropped) {
-      const syntheticEvent = {
+      handleFileChange({
         target: { files: [dropped] },
-      } as unknown as React.ChangeEvent<HTMLInputElement>;
-      handleFileChange(syntheticEvent);
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
     }
   };
 
@@ -76,9 +108,9 @@ export const UploadPage: React.FC = () => {
     .join(" ");
 
   return (
-    <div className={pageStyles.container}>
+    <div className={styles.sectionSeparator}>
       <div className={shared.header}>
-        <span className={`${shared.badge} ${shared.badgePrimary}`}>
+        <span className={`${shared.badge} ${shared.badgeAi}`}>
           <svg
             width="12"
             height="12"
@@ -88,13 +120,14 @@ export const UploadPage: React.FC = () => {
             strokeWidth="2.5"
             aria-hidden="true"
           >
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
-          Secure upload
+          Smartory ingestion
         </span>
-        <h1 className={shared.title}>Upload bank statement</h1>
+        <h2 className={shared.title}>Upload store receipt</h2>
         <p className={shared.description}>
-          Parse your PDF to extract transactions and analyze spending patterns.
+          Scan store receipts (Kaufland, Lidl, etc.) to extract raw items
+          automatically.
         </p>
       </div>
 
@@ -109,11 +142,11 @@ export const UploadPage: React.FC = () => {
         onDrop={onDrop}
         role="button"
         tabIndex={0}
-        aria-label="File upload area"
+        aria-label="Receipt upload area"
       >
         <input
           type="file"
-          accept=".pdf"
+          accept=".pdf,image/*"
           className={shared.fileInput}
           ref={fileInputRef}
           onChange={handleFileChange}
@@ -121,20 +154,24 @@ export const UploadPage: React.FC = () => {
         <div
           className={`${shared.iconWrap} ${file ? shared.iconWrapSuccess : ""}`}
         >
-          {file ? <CheckIcon /> : <FileIcon />}
+          {file ? <CheckIcon /> : <ReceiptIcon />}
         </div>
         <div className={shared.dzContent}>
           {file ? (
             <>
               <div className={`${shared.dzLabel} ${shared.dzLabelSuccess}`}>
-                File ready
+                Receipt ready
               </div>
               <div className={shared.fileChip}>{file.name}</div>
             </>
           ) : (
             <>
-              <div className={shared.dzLabel}>Click or drag your PDF here</div>
-              <div className={shared.dzSub}>Supports .pdf up to 20 MB</div>
+              <div className={shared.dzLabel}>
+                Click or drag your receipt PDF or image here
+              </div>
+              <div className={shared.dzSub}>
+                Supports .pdf and images up to 20 MB
+              </div>
             </>
           )}
         </div>
@@ -147,17 +184,15 @@ export const UploadPage: React.FC = () => {
         </div>
       )}
 
-      <div className={shared.divider} />
-
       <button
-        className={shared.button}
-        onClick={uploadFile}
+        className={`${shared.button}`}
+        onClick={uploadReceipt}
         disabled={!file || loading}
       >
         {loading ? (
           <>
             <span className={shared.spinner} aria-hidden="true" /> Processing
-            statement...
+            receipt with AI...
           </>
         ) : (
           <>
@@ -170,16 +205,34 @@ export const UploadPage: React.FC = () => {
               strokeWidth="2"
               aria-hidden="true"
             >
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4l3 3" />
             </svg>
-            Process statement
+            Process receipt
           </>
         )}
       </button>
 
-      {data && (
+      {data && isDuplicate && (
+        <div className={styles.warningCard} role="status" aria-live="polite">
+          <div className={styles.warningTitle}>
+            <WarningIcon />
+            {data.status}
+          </div>
+          <div className={styles.warningMeta}>{data.message}</div>
+          <div className={shared.statsRow}>
+            <span className={shared.statPill}>ID: #{data.receipt_id}</span>
+            <span className={shared.statPill}>Merchant: {data.merchant}</span>
+            {data.linked_to_bank_ledger && (
+              <span className={`${shared.statPill} ${shared.statPillAccent}`}>
+                <LinkIcon /> Linked to ledger
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {data && !isDuplicate && (
         <div className={shared.successCard} role="status" aria-live="polite">
           <div className={shared.successIcon}>
             <svg
@@ -196,26 +249,15 @@ export const UploadPage: React.FC = () => {
           </div>
           <div>
             <div className={shared.successTitle}>
-              Statement parsed successfully
+              Receipt processed successfully
             </div>
             <div className={shared.successMeta}>
-              Found {data.transactions.length} transactions · {data.month}{" "}
-              {data.year} · {data.bank}
-            </div>
-            <div className={shared.statsRow}>
-              <span className={shared.statPill}>
-                {data.transactions.length} transactions
-              </span>
-              <span className={shared.statPill}>
-                {data.month} {data.year}
-              </span>
-              <span className={shared.statPill}>{data.bank}</span>
+              Parsed items from {data.merchant} and matched them to your catalog
+              tracking profiles.
             </div>
           </div>
         </div>
       )}
-
-      <ReceiptUploadSection />
     </div>
   );
 };

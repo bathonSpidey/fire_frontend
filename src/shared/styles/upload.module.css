@@ -1,0 +1,292 @@
+/*
+ * Shared upload UI primitives.
+ * Import this in any feature that has a file upload surface.
+ * Do NOT put feature-specific overrides here — keep those in the
+ * feature's own module and compose with a second className.
+ */
+
+/* ── Header ── */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    padding: 3px 10px;
+    width: fit-content;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 0.5px solid transparent;
+}
+
+.badgePrimary {
+    color: var(--primary-text);
+    background: var(--primary-subtle);
+    border-color: var(--primary-border);
+}
+
+.badgeAi {
+    color: var(--ai-purple);
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.25);
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 4px;
+}
+
+.description {
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+/* ── Drop zone ── */
+.dropzone {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    background-color: var(--surface-raised);
+    transition: var(--transition-all);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropzone:hover,
+.dropzoneDrag {
+    border-color: var(--primary);
+    background-color: var(--primary-subtle);
+    transform: scale(1.005);
+}
+
+.dropzoneHasFile {
+    border-style: solid;
+    border-color: var(--success-border);
+    background-color: var(--success-subtle);
+}
+
+.fileInput {
+    display: none;
+}
+
+/* ── Drop zone icon ── */
+.iconWrap {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    transition: transform 0.2s ease;
+}
+
+.dropzone:hover .iconWrap,
+.dropzoneDrag .iconWrap {
+    transform: translateY(-2px);
+}
+
+.iconWrapSuccess {
+    color: var(--success);
+    border-color: var(--success-border);
+    background: var(--success-subtle);
+}
+
+/* ── Drop zone text ── */
+.dzContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.dzLabel {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.dzLabelSuccess {
+    color: var(--success-text);
+}
+
+.dzSub {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.fileChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--surface);
+    border: 0.5px solid var(--success-border);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--success-text);
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Divider ── */
+.divider {
+    height: 0.5px;
+    background: var(--border);
+}
+
+/* ── Button ── */
+.button {
+    width: 100%;
+    padding: 13px;
+    background-color: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition-all);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.button:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+.button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.buttonDark {
+    background-color: #18181b;
+}
+
+.buttonDark:hover:not(:disabled) {
+    background-color: #27272a;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: var(--radius-full);
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Error ── */
+.errorBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--danger-subtle);
+    border: 0.5px solid var(--danger-border);
+}
+
+.errorBox svg {
+    color: var(--danger);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.errorBox span {
+    font-size: 0.8125rem;
+    color: var(--danger-text);
+    line-height: 1.5;
+}
+
+/* ── Success card ── */
+.successCard {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--success-subtle);
+    border: 0.5px solid var(--success-border);
+}
+
+.successIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.successTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--success-text);
+    margin-bottom: 4px;
+}
+
+.successMeta {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.statsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.statPill {
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text-primary);
+}
+
+.statPillAccent {
+    background: var(--primary-subtle);
+    border-color: var(--primary-border);
+    color: var(--primary-text);
+}
