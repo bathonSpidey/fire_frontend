@@ -1,129 +1,147 @@
 import React, { useState } from "react";
-import type { MonthlyReceiptInventory, InventoryItem } from "../types";
+import type { MonthlyReceiptInventory } from "../types";
 import styles from "../styles/MonthlyInventory.module.css";
 
-const ChevronDown: React.FC = () => (
+interface ReceiptCardProps {
+  receipt: MonthlyReceiptInventory;
+  onItemStatusChange: (
+    itemName: string,
+    purchaseDate: string,
+    newStatus: string,
+    receiptId: number,
+    itemId: number,
+  ) => Promise<void>;
+}
+
+const ChevronDown: React.FC<{ className?: string }> = ({ className }) => (
   <svg
-    width="14"
-    height="14"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
     aria-hidden="true"
   >
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
-const SeparatorChevron: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
-);
+export const ReceiptCard: React.FC<ReceiptCardProps> = ({
+  receipt,
+  onItemStatusChange,
+}) => {
+  // Set to true if you prefer receipts open by default
+  const [isExpanded, setIsExpanded] = useState(false);
 
-interface ItemRowProps {
-  item: InventoryItem;
-}
-
-const ItemRow: React.FC<ItemRowProps> = ({ item }) => {
-  const isCool =
-    item.storage_condition.toLowerCase().includes("cool") ||
-    item.storage_condition.toLowerCase().includes("fridge") ||
-    item.storage_condition.toLowerCase().includes("refrig");
-
-  return (
-    <tr className={styles.itemRow}>
-      <td className={styles.itemNameCell}>
-        <span className={styles.itemName}>{item.name}</span>
-        {item.brand && <span className={styles.itemBrand}>{item.brand}</span>}
-      </td>
-      <td>
-        <span className={styles.pill}>{item.category}</span>
-      </td>
-      <td className={styles.cellMuted}>{item.quantity}</td>
-      <td className={styles.cellMuted}>{item.unit_cost.toFixed(2)} €</td>
-      <td>
-        <span
-          className={`${styles.pill} ${isCool ? styles.coolCondition : styles.normalCondition}`}
-        >
-          {item.storage_condition}
-        </span>
-      </td>
-      <td className={item.date_expiry ? styles.cellPrimary : styles.cellMuted}>
-        {item.date_expiry ?? "—"}
-      </td>
-    </tr>
-  );
-};
-
-interface ReceiptCardProps {
-  receipt: MonthlyReceiptInventory;
-}
-
-export const ReceiptCard: React.FC<ReceiptCardProps> = ({ receipt }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const getStatusClassName = (status: string) => {
+    switch (status) {
+      case "Available":
+        return styles.statusAvailable;
+      case "Consumed":
+        return styles.statusConsumed;
+      case "Spoiled":
+        return styles.statusSpoiled;
+      case "Discarded":
+        return styles.statusDiscarded;
+      default:
+        return "";
+    }
+  };
 
   return (
     <div className={styles.receiptCard}>
-      <button
-        className={styles.receiptHeader}
-        onClick={() => setIsOpen((o) => !o)}
-        aria-expanded={isOpen}
+      {/* Clickable Header Area */}
+      <div
+        className={styles.receiptHeaderInteractive}
+        onClick={() => setIsExpanded(!isExpanded)}
+        role="button"
+        aria-expanded={isExpanded}
       >
-        <div className={styles.receiptHeaderLeft}>
+        <div className={styles.headerLeft}>
+          <ChevronDown
+            className={`${styles.headerChevron} ${isExpanded ? styles.chevronRotated : ""}`}
+          />
           <span className={styles.storeTitle}>{receipt.store_name}</span>
-          <span className={styles.receiptDate}>
-            <SeparatorChevron />
-            {receipt.purchase_date}
-          </span>
-          {receipt.bank_statement_linked && (
-            <span className={styles.linkedBadge}>Linked</span>
-          )}
+          <span className={styles.purchaseDate}>{receipt.purchase_date}</span>
         </div>
-        <div className={styles.receiptTotal}>
-          {receipt.total_amount.toFixed(2)} €
-          {receipt.total_discount > 0 && (
-            <span className={styles.discountTag}>
-              -{receipt.total_discount.toFixed(2)} €
-            </span>
-          )}
-          <span
-            className={`${styles.receiptChevron} ${isOpen ? styles.receiptChevronOpen : ""}`}
-          >
-            <ChevronDown />
-          </span>
+        <div className={styles.totalAmount}>
+          {receipt.total_amount.toFixed(2)}€
         </div>
-      </button>
+      </div>
 
-      {isOpen && (
+      {/* Conditionally Rendered Items Table */}
+      {isExpanded && (
         <div className={styles.tableWrapper}>
           <table className={styles.itemTable}>
             <thead>
               <tr>
-                <th>Item</th>
+                <th>Item Name</th>
                 <th>Category</th>
                 <th>Qty</th>
-                <th>Unit cost</th>
+                <th>Unit Cost</th>
                 <th>Storage</th>
                 <th>Expiry</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {receipt.items.map((item) => (
-                <ItemRow key={item.id} item={item} />
+                <tr key={item.id}>
+                  <td style={{ fontWeight: 500 }}>
+                    {item.name} {item.brand ? `(${item.brand})` : ""}
+                  </td>
+                  <td>
+                    <span
+                      className={styles.pill}
+                      style={{ backgroundColor: "var(--surface-raised)" }}
+                    >
+                      {item.category}
+                    </span>
+                  </td>
+                  <td>{item.quantity}</td>
+                  <td>{item.unit_cost.toFixed(2)}€</td>
+                  <td>
+                    <span
+                      className={`${styles.pill} ${item.storage_condition.includes("Cool") ? styles.coolCondition : styles.normalCondition}`}
+                    >
+                      {item.storage_condition}
+                    </span>
+                  </td>
+                  <td
+                    style={{
+                      color: item.date_expiry
+                        ? "var(--text-primary)"
+                        : "var(--text-secondary)",
+                    }}
+                  >
+                    {item.date_expiry ? item.date_expiry : "—"}
+                  </td>
+                  {/* Prevents row status change clicks from bubbling up and collapsing the card */}
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <select
+                      className={`${styles.statusSelect} ${getStatusClassName(item.status || "Available")}`}
+                      value={item.status || "Available"}
+                      onChange={(e) =>
+                        onItemStatusChange(
+                          item.name,
+                          receipt.purchase_date,
+                          e.target.value,
+                          receipt.id,
+                          item.id,
+                        )
+                      }
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Consumed">Consumed</option>
+                      <option value="Spoiled">Spoiled</option>
+                      <option value="Discarded">Discarded</option>
+                    </select>
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>

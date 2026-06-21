@@ -37,7 +37,6 @@ const ChevronLeft: React.FC = () => (
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
-
 const ChevronRight: React.FC = () => (
   <svg
     width="16"
@@ -53,7 +52,6 @@ const ChevronRight: React.FC = () => (
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
-
 const UploadIcon: React.FC = () => (
   <svg
     width="15"
@@ -81,6 +79,7 @@ export const MonthlyInventoryPage: React.FC = () => {
     error,
     handlePrevMonth,
     handleNextMonth,
+    updateItemStatus,
   } = useMonthlyInventory();
   const {
     uploadMultipleReceipts,
@@ -185,7 +184,11 @@ export const MonthlyInventoryPage: React.FC = () => {
             </div>
           ) : (
             filteredReceipts.map((receipt) => (
-              <ReceiptCard key={receipt.id} receipt={receipt} />
+              <ReceiptCard
+                key={receipt.id}
+                receipt={receipt}
+                onItemStatusChange={updateItemStatus}
+              />
             ))
           )}
         </>

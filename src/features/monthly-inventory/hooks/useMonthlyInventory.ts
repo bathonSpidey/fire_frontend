@@ -32,6 +32,47 @@ export const useMonthlyInventory = () => {
     fetchInventory();
   }, [month, year]);
 
+  const updateItemStatus = async (
+    itemName: string,
+    purchaseDate: string,
+    newStatus: string,
+    receiptId: number,
+    itemId: number
+  ) => {
+    try {
+      const response = await fetch("http://localhost:8000/inventory/item/status", {
+        method: "PUT",
+        headers: {
+          "accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          item_name: itemName,
+          purchase_date: purchaseDate,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update item status on backend");
+
+      // Update state locally
+      setReceipts((prevReceipts) =>
+        prevReceipts.map((rec) => {
+          if (rec.id !== receiptId) return rec;
+          return {
+            ...rec,
+            items: rec.items.map((item) =>
+              item.id === itemId ? { ...item, status: newStatus } : item
+            ),
+          };
+        })
+      );
+    } catch (err) {
+      console.error("Status update error:", err);
+      alert("Could not update item status. Please check your connection.");
+    }
+  };
+
   const handlePrevMonth = () => {
     if (month === 1) {
       setMonth(12);
@@ -59,5 +100,6 @@ export const useMonthlyInventory = () => {
     error,
     handlePrevMonth,
     handleNextMonth,
+    updateItemStatus,
   };
 };
