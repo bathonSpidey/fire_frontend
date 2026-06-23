@@ -1,0 +1,212 @@
+.dashboardContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 4px;
+}
+
+.dashHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.dashTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.dashSubtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 4px 0 0 0;
+}
+
+.filterGroup {
+    display: flex;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.filterGroup label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.filterGroup select {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    color: var(--text-primary);
+    outline: none;
+}
+
+/* KPI Card Blocks */
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.kpiCard {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 8px);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.kpiLeakage {
+    border-left: 4px solid #e74c3c;
+}
+
+.kpiLabel {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.kpiValue {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.kpiAlertText {
+    color: #e6a23c;
+}
+
+/* Structural Split Grid Layout */
+.mainSplitLayout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 24px;
+}
+
+.panelCard {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 8px);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.panelTitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: var(--text-primary);
+}
+
+.scrollList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.listItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: var(--surface-raised, #f8fafc);
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid var(--border);
+}
+
+.itemNameBold {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.itemMetaSub {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Badges for status rules */
+.urgencyCRITICAL {
+    border-left: 4px solid #e74c3c;
+}
+
+.urgencyMEDIUM {
+    border-left: 4px solid #3498db;
+}
+
+.urgencyBadge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.inflationBadge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #e6a23c;
+}
+
+.severeInflation {
+    color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Long Term Data Matrix Table */
+.tableResponsive {
+    overflow-x: auto;
+}
+
+.analyticsTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.analyticsTable th {
+    padding: 12px;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.analyticsTable td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pacingPill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: rgba(52, 152, 219, 0.15);
+    color: #2980b9;
+}
+
+.centeredMsg {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+}
