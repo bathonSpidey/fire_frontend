@@ -1,3 +1,4 @@
+import { API_BASE } from "../../../core/api";
 import { useState, useEffect } from 'react';
 import type { BankStatementResponse } from '../../statement-upload/types';
 import { getInitialPeriod, getNextMonthPeriod, getPrevMonthPeriod } from '../utils/dateUtils';
@@ -17,7 +18,7 @@ export const useManageStatements = () => {
       setError(null);
       try {
         const res = await fetch(
-          `http://localhost:8000/statements/manage/filter/month?month=${month}&year=${year}`,
+          `${API_BASE}/statements/manage/filter/month?month=${month}&year=${year}`,
           { headers: { 'accept': 'application/json' } }
         );
         if (!res.ok) throw new Error(`Error loading data: ${res.status}`);

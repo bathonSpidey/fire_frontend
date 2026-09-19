@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useMonthlyInventory } from "../hooks/useMonthlyInventory";
 import { useReceiptUpload } from "../../receipt-upload/hooks/useReceiptUpload";
+import { isActive } from "../../receipt-upload/types";
 import { InventoryStats } from "./InventoryStats";
 import { ReceiptCard } from "./ReceiptCard";
-import { BulkFeedbackPanel } from "./BulkFeedbackPanel";
 import styles from "../styles/MonthlyInventory.module.css";
 
 const MONTHS = [
@@ -80,19 +80,23 @@ export const MonthlyInventoryPage: React.FC = () => {
     handlePrevMonth,
     handleNextMonth,
     updateItemStatus,
+    reload,
   } = useMonthlyInventory();
-  const {
-    uploadMultipleReceipts,
-    loading: uploading,
-    results,
-    clearResults,
-  } = useReceiptUpload();
+  const { uploadFiles, uploading, owner, jobs } = useReceiptUpload();
+  const activeCount = jobs.filter(isActive).length;
+  const previousActive = useRef(0);
+
+  // When background receipts finish, show them without a manual refresh.
+  useEffect(() => {
+    if (previousActive.current > 0 && activeCount === 0) reload();
+    previousActive.current = activeCount;
+  }, [activeCount, reload]);
   const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      await uploadMultipleReceipts(e.target.files);
+      await uploadFiles(Array.from(e.target.files));
       e.target.value = "";
     }
   };
@@ -155,8 +159,7 @@ export const MonthlyInventoryPage: React.FC = () => {
             >
               {uploading ? (
                 <>
-                  <span className={styles.spinner} aria-hidden="true" /> Parsing
-                  batch...
+                  <span className={styles.spinner} aria-hidden="true" /> Uploading...
                 </>
               ) : (
                 <>
@@ -174,8 +177,11 @@ export const MonthlyInventoryPage: React.FC = () => {
             />
           </div>
 
-          {results.length > 0 && (
-            <BulkFeedbackPanel results={results} onDismiss={clearResults} />
+          {activeCount > 0 && (
+            <div className={styles.infoMessage}>
+              Reading {activeCount} receipt(s) in the background (as {owner}). They appear here
+              when done; progress is on the Upload page.
+            </div>
           )}
 
           {filteredReceipts.length === 0 ? (

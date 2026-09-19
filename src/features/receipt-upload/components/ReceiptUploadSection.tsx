@@ -1,5 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useReceiptUpload } from "../hooks/useReceiptUpload";
+import { isActive } from "../types";
+import type { IngestJob } from "../types";
 import shared from "../../../shared/styles/upload.module.css";
 import styles from "../styles/ReceiptUpload.module.css";
 
@@ -46,40 +48,22 @@ const AlertIcon: React.FC = () => (
     <line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 );
-const WarningIcon: React.FC = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    aria-hidden="true"
-  >
-    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-    <line x1="12" y1="9" x2="12" y2="13" />
-    <line x1="12" y1="17" x2="12.01" y2="17" />
-  </svg>
-);
-const LinkIcon: React.FC = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    aria-hidden="true"
-  >
-    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-  </svg>
-);
 
 export const ReceiptUploadSection: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { files, loading, error, results, handleFileChange, uploadMultipleReceipts } = useReceiptUpload();
+  const {
+    files,
+    owners,
+    owner,
+    setOwner,
+    uploading,
+    error,
+    rejected,
+    jobs,
+    handleFileChange,
+    uploadReceipts,
+  } = useReceiptUpload();
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -118,8 +102,29 @@ export const ReceiptUploadSection: React.FC = () => {
         </span>
         <h2 className={shared.title}>Upload store receipts</h2>
         <p className={shared.description}>
-          Scan one or multiple receipts to extract raw items automatically.
+          Upload receipts as you get them during the month. They are read in the background and
+          filed by month automatically.
         </p>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        <span className={shared.dzSub}>Uploading as</span>
+        {owners.map((name) => (
+          <button
+            key={name}
+            type="button"
+            onClick={() => setOwner(name)}
+            className={shared.fileChip}
+            aria-pressed={owner === name}
+            style={{
+              cursor: "pointer",
+              fontWeight: owner === name ? 700 : 400,
+              outline: owner === name ? "2px solid currentColor" : "none",
+            }}
+          >
+            {name}
+          </button>
+        ))}
       </div>
 
       <div
@@ -189,101 +194,68 @@ export const ReceiptUploadSection: React.FC = () => {
         </div>
       )}
 
-      <button className={shared.button} onClick={() => uploadMultipleReceipts()} disabled={files.length === 0 || loading}>
-        {loading ? (
+      <button
+        className={shared.button}
+        onClick={uploadReceipts}
+        disabled={files.length === 0 || uploading || !owner}
+      >
+        {uploading ? (
           <>
-            <span className={shared.spinner} aria-hidden="true" /> Processing
-            batch with AI...
+            <span className={shared.spinner} aria-hidden="true" /> Uploading...
           </>
         ) : (
-          <>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 8v4l3 3" />
-            </svg>{" "}
-            Process batch
-          </>
+          <>Upload {files.length > 0 ? files.length + " file(s)" : "receipts"}</>
         )}
       </button>
 
-      {/* Results Feed Stack Container */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          marginTop: "16px",
-        }}
-      >
-        {results.map((data, index) => {
-          const isDuplicate = data.status.includes("Duplicate");
-          return isDuplicate ? (
-            <div
-              key={index}
-              className={styles.warningCard}
-              role="status"
-              aria-live="polite"
-            >
-              <div className={styles.warningTitle}>
-                <WarningIcon />
-                {data.status}
-              </div>
-              <div className={styles.warningMeta}>{data.message}</div>
-              <div className={shared.statsRow}>
-                <span className={shared.statPill}>ID: #{data.receipt_id}</span>
-                <span className={shared.statPill}>
-                  Merchant: {data.merchant}
-                </span>
-                {data.linked_to_bank_ledger && (
-                  <span
-                    className={`${shared.statPill} ${shared.statPillAccent}`}
-                  >
-                    <LinkIcon /> Linked to ledger
-                  </span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div
-              key={index}
-              className={shared.successCard}
-              role="status"
-              aria-live="polite"
-            >
-              <div className={shared.successIcon}>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2.5"
-                  aria-hidden="true"
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              </div>
-              <div>
-                <div className={shared.successTitle}>
-                  Receipt processed successfully
-                </div>
-                <div className={shared.successMeta}>
-                  Parsed items from {data.merchant || "Store"} and matched them
-                  to your catalog tracking profiles.
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      {rejected.map((r, i) => (
+        <div key={"rej-" + i} className={shared.errorBox} role="alert">
+          <AlertIcon />
+          <span>
+            {r.filename}: {r.reason}
+          </span>
+        </div>
+      ))}
+
+      {jobs.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+          <div className={shared.dzSub}>Recent uploads</div>
+          {jobs.map((job) => (
+            <JobRow key={job.id} job={job} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const STATUS_LABEL: Record<IngestJob["status"], string> = {
+  queued: "Waiting in queue",
+  processing: "Reading receipt...",
+  saved: "Saved",
+  needs_review: "Saved - needs your review",
+  duplicate: "Already stored",
+  failed: "Failed",
+};
+
+const JobRow: React.FC<{ job: IngestJob }> = ({ job }) => {
+  const active = isActive(job);
+  const cardClass =
+    job.status === "failed"
+      ? shared.errorBox
+      : job.status === "duplicate" || job.status === "needs_review"
+        ? styles.warningCard
+        : shared.successCard;
+  return (
+    <div className={cardClass} role="status" aria-live="polite">
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        {active ? <span className={shared.spinner} aria-hidden="true" /> : null}
+        <strong>{job.original_name}</strong>
+        <span className={shared.statPill}>{job.owner}</span>
+        <span className={shared.statPill}>{STATUS_LABEL[job.status]}</span>
+        {job.receipt_id !== null && <span className={shared.statPill}>#{job.receipt_id}</span>}
       </div>
+      {job.message && !active && <div className={styles.warningMeta}>{job.message}</div>}
     </div>
   );
 };

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { API_BASE } from "../../../core/api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MonthlyReceiptInventory } from "../types";
 
 export const useMonthlyInventory = () => {
@@ -8,12 +9,22 @@ export const useMonthlyInventory = () => {
   const [receipts, setReceipts] = useState<MonthlyReceiptInventory[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const silentReload = useRef(false);
+
+  // Re-fetch without flashing the "Loading..." state (e.g. after background receipts finish).
+  const reload = useCallback(() => {
+    silentReload.current = true;
+    setReloadKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
+    const silent = silentReload.current;
+    silentReload.current = false;
     const fetchInventory = async () => {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
-      const url = `http://localhost:8000/inventory-management/receipts/month?year=${year}&month=${month}`;
+      const url = `${API_BASE}/inventory-management/receipts/month?year=${year}&month=${month}`;
 
       try {
         const res = await fetch(url, { headers: { accept: "application/json" } });
@@ -30,7 +41,7 @@ export const useMonthlyInventory = () => {
     };
 
     fetchInventory();
-  }, [month, year]);
+  }, [month, year, reloadKey]);
 
   const updateItemStatus = async (
     itemName: string,
@@ -40,7 +51,7 @@ export const useMonthlyInventory = () => {
     itemId: number
   ) => {
     try {
-      const response = await fetch("http://localhost:8000/inventory/item/status", {
+      const response = await fetch(`${API_BASE}/inventory/item/status`, {
         method: "PUT",
         headers: {
           "accept": "application/json",
@@ -101,5 +112,6 @@ export const useMonthlyInventory = () => {
     handlePrevMonth,
     handleNextMonth,
     updateItemStatus,
+    reload,
   };
 };

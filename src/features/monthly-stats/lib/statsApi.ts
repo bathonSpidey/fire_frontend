@@ -1,6 +1,7 @@
+import { API_BASE } from "../../../core/api";
 import type { MonthlyStatsResponse } from "../types";
 
-const STATS_BASE_URL = "http://localhost:8000/stats/";
+const STATS_BASE_URL = `${API_BASE}/stats/`;
 
 /**
  * Fetches monthly stats for a single period.

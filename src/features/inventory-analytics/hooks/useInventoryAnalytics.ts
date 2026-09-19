@@ -1,3 +1,4 @@
+import { API_BASE } from "../../../core/api";
 import { useState, useEffect } from "react";
 import type { InventoryAnalyticsPayload } from "../types";
 
@@ -13,7 +14,7 @@ export const useInventoryAnalytics = (initialRollingDays = 90, initialLeakageDay
       setLoading(true);
       setError(null);
       try {
-        const url = `http://localhost:8000/inventory-analytics/dashboard?rolling_days=${rollingDays}&leakage_days=${leakageDays}`;
+        const url = `${API_BASE}/inventory-analytics/dashboard?rolling_days=${rollingDays}&leakage_days=${leakageDays}`;
         const res = await fetch(url, { headers: { accept: "application/json" } });
         
         if (!res.ok) throw new Error(`Analytics server returned status: ${res.status}`);

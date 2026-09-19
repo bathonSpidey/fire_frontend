@@ -1,3 +1,4 @@
+import { API_BASE } from "../../../core/api";
 import { useState, type ChangeEvent } from 'react';
 import { type BankStatementResponse } from '../types';
 
@@ -33,7 +34,7 @@ export const useStatementUpload = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/statements/upload', {
+      const response = await fetch(`${API_BASE}/statements/upload`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
