@@ -5,6 +5,7 @@ export interface InventoryItem {
   brand: string | null;
   quantity: number;
   unit_cost: number;
+  discount?: number; // line discount (positive), taken off quantity x unit_cost
   category: string; // coarse pantry group
   spend_category?: string | null; // the spending category (editable)
   status: string;
@@ -20,6 +21,8 @@ export interface MonthlyReceiptInventory {
   total_discount: number;
   purchase_date: string;
   bank_statement_linked: boolean;
+  owner?: string | null;
+  status?: string; // ok | needs_review
   created_at: string;
   items: InventoryItem[];
 }

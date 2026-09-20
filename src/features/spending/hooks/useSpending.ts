@@ -36,7 +36,11 @@ export const useSpending = () => {
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
+  const nowIndex = now.getFullYear() * 12 + now.getMonth();
+  const canGoNext = year * 12 + (month - 1) < nowIndex; // nothing is paid in advance
+
   const step = (delta: number) => {
+    if (delta > 0 && !canGoNext) return;
     const index = year * 12 + (month - 1) + delta;
     setYear(Math.floor(index / 12));
     setMonth((index % 12) + 1);
@@ -63,7 +67,7 @@ export const useSpending = () => {
   };
 
   return {
-    month, year, data, loading, error, reload, recheckMessage,
+    month, year, data, loading, error, reload, recheckMessage, canGoNext,
     handlePrev: () => step(-1),
     handleNext: () => step(1),
     categorizeUncategorized,

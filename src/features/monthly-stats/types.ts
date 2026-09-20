@@ -12,6 +12,8 @@ export interface CategoryStat {
 export interface StatsSources {
   statements: string[]; // banks whose statement is uploaded for the month
   receipts: number; // receipts dated in the month
+  receipt_total?: number; // spending that comes from receipt items
+  bank_only_total?: number; // spending paid without a receipt (bank and PayPal)
 }
 
 export interface MonthlyStatsResponse {

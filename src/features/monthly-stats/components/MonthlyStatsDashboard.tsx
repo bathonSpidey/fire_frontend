@@ -11,10 +11,18 @@ import { CategoryDonutChart } from "./CategoryDonutChart";
 import { CategoryBreakdownList } from "./CategoryBreakdownList";
 import styles from "../styles/MonthlyStats.module.css";
 
+// A short explanation under a number, so nobody has to guess what it includes.
+const Hint: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <span style={{ fontSize: "0.75rem", lineHeight: 1.4, color: "var(--text-secondary)", marginTop: "4px" }}>
+    {children}
+  </span>
+);
+
 // One line saying what the month is built from, and what is still missing (nothing is hidden).
 const SourceNote: React.FC<{ stats: MonthlyStatsResponse }> = ({ stats }) => {
   const sources = stats.sources;
   if (!sources) return null;
+  const euro = (value: number) => `${value.toFixed(2)} €`;
   const receipts = `${sources.receipts} receipt${sources.receipts === 1 ? "" : "s"}`;
   const hasRealBank = sources.statements.some((bank) => bank !== "PayPal");
   const parts = [
@@ -34,6 +42,13 @@ const SourceNote: React.FC<{ stats: MonthlyStatsResponse }> = ({ stats }) => {
       }}
     >
       Based on {parts.join(" and ")}.
+      {sources.receipts > 0 && sources.receipt_total !== undefined && (
+        <>
+          {" "}
+          Spending {euro(stats.lifestyle_expenses)} = {euro(sources.receipt_total)} from the receipts +{" "}
+          {euro(sources.bank_only_total ?? 0)} paid without a receipt (bank or PayPal).
+        </>
+      )}
       {!hasRealBank &&
         " No bank account statement for this month yet: income, investments and fixed costs such as rent appear when it is uploaded."}
     </div>
@@ -77,6 +92,7 @@ export const MonthlyStatsDashboard: React.FC<DashboardProps> = ({
             {formatEuro(stats.gross_income)}
           </span>
           {incomeTrend && <TrendIndicator trend={incomeTrend} />}
+          <Hint>Money that arrived: salary, refunds, money from friends. Moves between your own accounts do not count.</Hint>
         </div>
 
         <div className={styles.kpiCard}>
@@ -85,6 +101,7 @@ export const MonthlyStatsDashboard: React.FC<DashboardProps> = ({
             {formatEuro(stats.lifestyle_expenses)}
           </span>
           {expenseTrend && <TrendIndicator trend={expenseTrend} invertColor />}
+          <Hint>Everything spent on living this month: receipts plus payments made without a receipt. Not transfers or investments.</Hint>
         </div>
 
         <div className={styles.kpiCard}>
@@ -95,6 +112,7 @@ export const MonthlyStatsDashboard: React.FC<DashboardProps> = ({
             {formatEuro(stats.net_savings, true)}
           </span>
           {savingsTrend && <TrendIndicator trend={savingsTrend} />}
+          <Hint>Gross income minus lifestyle expenses.</Hint>
         </div>
 
         <div className={styles.kpiCard}>
@@ -105,6 +123,7 @@ export const MonthlyStatsDashboard: React.FC<DashboardProps> = ({
             {formatPercent(stats.savings_rate_pct)}
           </span>
           {savingsRateTrend && <TrendIndicator trend={savingsRateTrend} />}
+          <Hint>Net savings as a share of gross income.</Hint>
         </div>
       </div>
 

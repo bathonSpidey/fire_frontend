@@ -6,6 +6,7 @@ interface NavigatorProps {
   year: number;
   onPrev: () => void;
   onNext: () => void;
+  canGoNext: boolean;
   onYearChange: (year: number) => void;
 }
 
@@ -41,9 +42,10 @@ const ChevronRight: React.FC = () => (
   </svg>
 );
 
+const FIRST_YEAR = 2024;
 const AVAILABLE_YEARS = Array.from(
-  { length: 2026 - 2024 + 1 },
-  (_, i) => 2024 + i,
+  { length: new Date().getFullYear() - FIRST_YEAR + 1 },
+  (_, i) => FIRST_YEAR + i,
 );
 
 export const DateNavigator: React.FC<NavigatorProps> = ({
@@ -51,6 +53,7 @@ export const DateNavigator: React.FC<NavigatorProps> = ({
   year,
   onPrev,
   onNext,
+  canGoNext,
   onYearChange,
 }) => (
   <div className={styles.navigator}>
@@ -66,7 +69,10 @@ export const DateNavigator: React.FC<NavigatorProps> = ({
       <button
         className={styles.arrowBtn}
         onClick={onNext}
+        disabled={!canGoNext}
         aria-label="Next month"
+        title={canGoNext ? undefined : "This is the current month"}
+        style={canGoNext ? undefined : { opacity: 0.35, cursor: "default" }}
       >
         <ChevronRight />
       </button>

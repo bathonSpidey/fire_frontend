@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./core/components/Navbar/Navbar";
 import { UploadPage } from "./features/statement-upload/components/UploadPage";
 import { StatementManagePage } from "./features/statement-manage/components/StatementManagePage";
-import { MonthlyInventoryPage } from "./features/monthly-inventory/components/MonthlyInventoryPage";
+import { InventoryPage } from "./features/inventory/components/InventoryPage";
 import { ReviewPage } from "./features/review/components/ReviewPage";
 import { SpendingPage } from "./features/spending/components/SpendingPage";
 import { CategoriesPage } from "./features/categories/components/CategoriesPage";
@@ -17,7 +17,7 @@ export function App() {
           <Route path="/" element={<Navigate to="/manage" />} />
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/manage" element={<StatementManagePage />} />
-          <Route path="/inventory" element={<MonthlyInventoryPage />} />
+          <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/spending" element={<SpendingPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/questions" element={<ReviewPage />} />

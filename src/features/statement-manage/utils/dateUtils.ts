@@ -1,20 +1,24 @@
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+// The view opens on the current month: receipts show up here as soon as they are uploaded.
 export const getInitialPeriod = () => {
-  const currentDate = new Date();
-  let monthIndex = currentDate.getMonth() - 1; // Current Month - 1
-  let year = currentDate.getFullYear();
+  const now = new Date();
+  return { month: MONTHS[now.getMonth()], year: now.getFullYear() };
+};
 
-  // Handle underflow adjustment for January (Index 0 - 1 = -1 -> December previous year)
-  if (monthIndex < 0) {
-    monthIndex = 11;
-    year -= 1;
+// Nothing is paid in advance, so there is nothing to look at beyond the current month.
+export const isLatestPeriod = (month: string, year: number): boolean => {
+  const now = new Date();
+  return year * 12 + MONTHS.indexOf(month) >= now.getFullYear() * 12 + now.getMonth();
+};
+
+export const clampToNow = (month: string, year: number) => {
+  const now = new Date();
+  if (year > now.getFullYear()) return { month: MONTHS[now.getMonth()], year: now.getFullYear() };
+  if (year === now.getFullYear() && MONTHS.indexOf(month) > now.getMonth()) {
+    return { month: MONTHS[now.getMonth()], year };
   }
-
-  return {
-    month: MONTHS[monthIndex],
-    year,
-  };
+  return { month, year };
 };
 
 export const getNextMonthPeriod = (currentMonth: string, currentYear: number) => {
