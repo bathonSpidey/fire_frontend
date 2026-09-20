@@ -52,7 +52,7 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
   categories,
 }) => {
   const chartData = categories.map((c) => ({
-    name: formatCategoryLabel(c.name),
+    name: c.label ?? formatCategoryLabel(c.name),
     value: c.total,
   }));
 

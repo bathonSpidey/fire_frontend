@@ -4,6 +4,8 @@ import { UploadPage } from "./features/statement-upload/components/UploadPage";
 import { StatementManagePage } from "./features/statement-manage/components/StatementManagePage";
 import { MonthlyInventoryPage } from "./features/monthly-inventory/components/MonthlyInventoryPage";
 import { ReviewPage } from "./features/review/components/ReviewPage";
+import { SpendingPage } from "./features/spending/components/SpendingPage";
+import { CategoriesPage } from "./features/categories/components/CategoriesPage";
 import { InventoryAnalyticsDashboard } from "./features/inventory-analytics/components/InventoryAnalyticsDashboard";
 
 export function App() {
@@ -16,6 +18,8 @@ export function App() {
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/manage" element={<StatementManagePage />} />
           <Route path="/inventory" element={<MonthlyInventoryPage />} />
+          <Route path="/spending" element={<SpendingPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/questions" element={<ReviewPage />} />
           <Route path="/analytics" element={<InventoryAnalyticsDashboard />} />
           <Route path="*" element={<Navigate to="/manage" />} />

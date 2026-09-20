@@ -24,11 +24,17 @@ export const Navbar: React.FC = () => {
           <NavLink to="/upload" className={getLinkClass}>
             Upload
           </NavLink>
+          <NavLink to="/spending" className={getLinkClass}>
+            Spending
+          </NavLink>
           <NavLink to="/manage" className={getLinkClass}>
             Dashboard
           </NavLink>
           <NavLink to="/inventory" className={getLinkClass}>
             Inventory
+          </NavLink>
+          <NavLink to="/categories" className={getLinkClass}>
+            Categories
           </NavLink>
           <NavLink to="/questions" className={getLinkClass}>
             Questions{questions.length > 0 ? ` (${questions.length})` : ""}

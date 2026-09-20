@@ -10,6 +10,9 @@
  *   investment purchase show up as income on top of the transfer that funded it.
  * - everything else is an expense.
  *
+ * Categories now arrive with their own `flow` from the backend (the household edits the list),
+ * so the name rules below are only a fallback for data without one.
+ *
  * This is the ONLY place category-type rules live. If the classification
  * logic ever changes, this is the single file to update.
  */
@@ -19,7 +22,12 @@ export type CategoryType = "income" | "expense" | "transfer" | "investment";
 const INCOME_CATEGORIES = new Set(["SALARY", "RETURNS", "OTHER_INCOME"]);
 const TRANSFER_CATEGORIES = new Set(["BANK_TRANSFER", "INTERNAL_TRANSFER_IN", "INTERNAL_TRANSFER_OUT"]);
 
-export function classifyCategory(categoryKey: string): CategoryType {
+export function classifyCategory(categoryKey: string, flow?: string | null): CategoryType {
+  // The category list knows what each category is (income, expense, investment); use it.
+  if (flow === "income" || flow === "expense" || flow === "investment") {
+    return flow;
+  }
+
   if (TRANSFER_CATEGORIES.has(categoryKey)) {
     return "transfer";
   }

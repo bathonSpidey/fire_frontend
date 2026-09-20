@@ -30,7 +30,7 @@ export const CategoryBreakdownList: React.FC<CategoryBreakdownListProps> = ({
         <div key={category.name} className={styles.categoryItem}>
           <div className={styles.categoryMeta}>
             <span className={styles.categoryName}>
-              {formatCategoryLabel(category.name)}
+              {category.label ?? formatCategoryLabel(category.name)}
             </span>
             <span className={styles.infoLabel}>
               {formatEuro(category.total)} (

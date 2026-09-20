@@ -106,6 +106,21 @@ export const useReceiptUpload = () => {
 
   const uploadReceipts = () => uploadFiles(files, asOneDocument);
 
+  // Queue a failed document again without uploading it again.
+  const retryJob = async (jobId: number) => {
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/documents/jobs/${jobId}/retry`, { method: "POST" });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => null);
+        throw new Error(detail?.detail ?? `Could not retry (status ${res.status})`);
+      }
+      await refreshJobs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not retry");
+    }
+  };
+
   return {
     files,
     owners,
@@ -121,5 +136,6 @@ export const useReceiptUpload = () => {
     handleFileChange,
     uploadReceipts,
     uploadFiles,
+    retryJob,
   };
 };

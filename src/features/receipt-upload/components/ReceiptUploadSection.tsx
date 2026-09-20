@@ -39,6 +39,7 @@ const KIND_LABEL: Record<IngestJob["kind"], string> = {
   auto: "Reading...",
   receipt: "Receipt",
   statement: "Bank statement",
+  recategorize: "Category re-check",
 };
 
 export const ReceiptUploadSection: React.FC = () => {
@@ -57,6 +58,7 @@ export const ReceiptUploadSection: React.FC = () => {
     jobs,
     handleFileChange,
     uploadReceipts,
+    retryJob,
   } = useReceiptUpload();
 
   const onDrop = (e: React.DragEvent) => {
@@ -210,7 +212,7 @@ export const ReceiptUploadSection: React.FC = () => {
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
           <div className={shared.dzSub}>Recent uploads</div>
           {jobs.map((job) => (
-            <JobRow key={job.id} job={job} />
+            <JobRow key={job.id} job={job} onRetry={() => retryJob(job.id)} />
           ))}
         </div>
       )}
@@ -218,7 +220,7 @@ export const ReceiptUploadSection: React.FC = () => {
   );
 };
 
-const JobRow: React.FC<{ job: IngestJob }> = ({ job }) => {
+const JobRow: React.FC<{ job: IngestJob; onRetry: () => void }> = ({ job, onRetry }) => {
   const active = isActive(job);
   const cardClass =
     job.status === "failed"
@@ -236,6 +238,13 @@ const JobRow: React.FC<{ job: IngestJob }> = ({ job }) => {
         <span className={shared.statPill}>{STATUS_LABEL[job.status]}</span>
       </div>
       {job.message && !active && <div className={styles.warningMeta}>{job.message}</div>}
+      {job.status === "failed" && !(job.message ?? "").includes("Retried as job") && (
+        <div>
+          <button type="button" className={shared.fileChip} style={{ cursor: "pointer" }} onClick={onRetry}>
+            Try again
+          </button>
+        </div>
+      )}
     </div>
   );
 };

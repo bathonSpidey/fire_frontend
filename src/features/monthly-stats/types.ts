@@ -1,6 +1,11 @@
 export interface CategoryStat {
   total: number;
   percentage_of_total: number;
+  // Set by the backend from the household's category list
+  flow?: "income" | "expense" | "investment" | null;
+  label?: string | null;
+  group?: string | null;
+  fixed?: boolean;
 }
 
 export interface MonthlyStatsResponse {

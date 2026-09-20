@@ -1,0 +1,178 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 0 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.intro {
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.card {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.formRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.input,
+.select,
+.textarea {
+  padding: 8px 10px;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 56px;
+  resize: vertical;
+}
+
+.grow {
+  flex: 1;
+  min-width: 160px;
+}
+
+.button {
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.subtle {
+  padding: 4px 10px;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+
+.danger {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.groupTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 4px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 0.5px solid var(--border);
+}
+
+.rowMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.meta {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.inactive {
+  opacity: 0.5;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+
+.chipOn {
+  border-color: currentColor;
+  font-weight: 600;
+}
+
+.notice {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  line-height: 1.5;
+}
+
+.error {
+  border-color: #c0392b;
+  color: #c0392b;
+}

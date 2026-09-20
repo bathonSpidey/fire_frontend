@@ -23,7 +23,7 @@ export function groupCategoriesByType(
   const expense: NamedCategoryStat[] = [];
 
   for (const [name, stat] of Object.entries(categories)) {
-    const type = classifyCategory(name);
+    const type = classifyCategory(name, stat.flow);
     if (type === "transfer" || type === "investment") continue;
 
     const entry: NamedCategoryStat = { name, ...stat };

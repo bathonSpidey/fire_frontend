@@ -1,0 +1,197 @@
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 0 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.navigator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.navButton {
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.monthTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  min-width: 190px;
+  text-align: center;
+  margin: 0;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.kpi {
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpiLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.kpiValue {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.kpiSub {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.notice {
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  line-height: 1.5;
+  font-size: 0.9375rem;
+}
+
+.noticeRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.group {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.4fr) 3fr auto;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.9375rem;
+}
+
+.barTrack {
+  height: 10px;
+  border-radius: 6px;
+  background: var(--border);
+  display: flex;
+  overflow: hidden;
+}
+
+.barReceipt {
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.barBank {
+  background: currentColor;
+  opacity: 0.35;
+}
+
+.amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.delta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-left: 6px;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9375rem;
+}
+
+.listRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 1fr auto;
+  }
+  .barTrack {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}

@@ -7,7 +7,7 @@ export type JobStatus =
   | "failed";
 
 // "auto" until Claude has read the document; then what it decided it is.
-export type DocumentKind = "auto" | "receipt" | "statement";
+export type DocumentKind = "auto" | "receipt" | "statement" | "recategorize";
 
 export interface IngestJob {
   id: number;
