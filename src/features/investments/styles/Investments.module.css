@@ -351,3 +351,149 @@
   grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
   gap: 1rem;
 }
+
+/* plans */
+.planRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 0.5px solid var(--border);
+}
+
+.rowTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nextDates {
+  font-size: 0.875rem;
+}
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
+.form > .hint {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.input,
+.select {
+  padding: 8px 10px;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border-strong);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  min-width: 0;
+}
+
+.primaryButton {
+  padding: 9px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--primary-border);
+  background: var(--primary-subtle);
+  color: var(--primary-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dangerButton {
+  padding: 9px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--danger-border);
+  background: var(--danger-subtle);
+  color: var(--danger-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bookingRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inlineForm {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
+.mutedStrong {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.shareBar {
+  display: inline-block;
+  width: 56px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 3px;
+  background: var(--border);
+  vertical-align: middle;
+  overflow: hidden;
+}
+
+.shareFill {
+  display: block;
+  height: 100%;
+  background: var(--text-secondary);
+}
+
+.smallButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

@@ -1,7 +1,7 @@
 import React from "react";
 import { euro, monthYear, shortDate } from "../lib/format";
 import { brokerColor, chartColors, useDarkMode } from "../lib/palette";
-import type { BookingKind, InvestmentSummary } from "../types";
+import type { BookingKind, InvestmentSummary, PlanCheck } from "../types";
 import { UNKNOWN } from "../types";
 import { CumulativeChart, MonthlyChart } from "./InvestmentCharts";
 import { BookingsList, FlowList, InstrumentsTable, MonthsTable, MovedOutList, YearsTable } from "./InvestmentTables";
@@ -105,8 +105,57 @@ export const OverviewView: React.FC<{ data: InvestmentSummary; onChange: Change 
   );
 };
 
-export const BrokerView: React.FC<{ data: InvestmentSummary; broker: string; onChange: Change }> = ({
-  data, broker, onChange,
+type Label = (id: number, instrument: string | null) => void;
+
+// The plans against the statements: were the expected buys made, and what did nobody plan?
+const PlanCheckCard: React.FC<{ check: PlanCheck; broker: string }> = ({ check, broker }) => {
+  const nothingToSay = check.expected === 0 && check.manual.count === 0 && check.ambiguous.count === 0 && check.unanchored_plans === 0;
+  if (nothingToSay) return null;
+  return (
+    <div className={`${styles.card} ${check.missed.length > 0 ? styles.cardWarn : ""}`}>
+      <h2 className={styles.cardTitle}>Your plans against your {broker} statements</h2>
+      {check.expected > 0 && (
+        <span>
+          The plans with a known execution day should have bought <strong>{check.expected}</strong> times where you have
+          statements: <strong>{check.matched}</strong> found{check.missed.length > 0 ? `, ${check.missed.length} missing.` : ", nothing missing."}
+        </span>
+      )}
+      {check.missed.length > 0 && (
+        <div className={styles.list}>
+          {check.missed.map((m) => (
+            <div key={`${m.plan_id}-${m.date}`} className={styles.listRow}>
+              <span>
+                {shortDate(m.date)} <span className={styles.muted}>{m.instrument}: no buy of this amount within 3 days</span>
+              </span>
+              <span>{euro(m.amount)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {check.manual.count > 0 && (
+        <span>
+          <strong>{check.manual.count}</strong> {check.manual.count === 1 ? "buy" : "buys"} ({euro(check.manual.net)}) fit no plan:
+          bought by hand. Type the ticker on each in the bookings list below.
+        </span>
+      )}
+      {check.ambiguous.count > 0 && (
+        <span>
+          <strong>{check.ambiguous.count}</strong> {check.ambiguous.count === 1 ? "buy" : "buys"} ({euro(check.ambiguous.net)}) could belong
+          to several plans with the same amount. Enter each plan&apos;s execution day on the Plans tab and they are matched exactly.
+        </span>
+      )}
+      {check.unanchored_plans > 0 && check.ambiguous.count === 0 && (
+        <span className={styles.hint}>
+          {check.unanchored_plans} {check.unanchored_plans === 1 ? "plan has" : "plans have"} no execution day yet (Plans tab): matching then
+          uses the amount only.
+        </span>
+      )}
+    </div>
+  );
+};
+
+export const BrokerView: React.FC<{ data: InvestmentSummary; broker: string; onChange: Change; onLabel: Label }> = ({
+  data, broker, onChange, onLabel,
 }) => {
   if (data.totals.bookings === 0) {
     return (
@@ -136,11 +185,13 @@ export const BrokerView: React.FC<{ data: InvestmentSummary; broker: string; onC
             {euro(data.unknown.net)} in {data.unknown.count} {data.unknown.count === 1 ? "booking" : "bookings"} has no instrument
           </strong>
           <span className={styles.hint}>
-            {broker} does not say what these bought, only the amount. The totals are right; the split by instrument is
-            not known yet.
+            {broker} does not say what these bought, only the amount. The totals are right. Add your savings plans on the
+            Plans tab and buys from when they started are named for you; earlier ones stay unknown.
           </span>
         </div>
       )}
+
+      {data.plan_check[broker] && <PlanCheckCard check={data.plan_check[broker]} broker={broker} />}
 
       <Chart title="Invested over time" hint="Running total">
         <CumulativeChart months={data.months} />
@@ -166,7 +217,7 @@ export const BrokerView: React.FC<{ data: InvestmentSummary; broker: string; onC
 
       <FlowList title="Costs" hint="account fees and taxes, not invested" total={data.costs.total} items={data.costs.items} />
       <FlowList title="Dividends and refunds" hint="paid out to you, not invested" total={data.received.total} items={data.received.items} />
-      <BookingsList bookings={data.bookings} onChange={onChange} />
+      <BookingsList bookings={data.bookings} known={data.known_instruments} onMove={onChange} onLabel={onLabel} />
       <MovedOutList items={data.moved_out} onChange={onChange} />
     </>
   );

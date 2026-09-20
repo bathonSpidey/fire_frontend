@@ -3,16 +3,17 @@ import { useInvestments } from "../hooks/useInvestments";
 import { brokerColor, chartColors, useDarkMode } from "../lib/palette";
 import type { Broker } from "../types";
 import { BrokerView, OverviewView } from "./InvestmentViews";
+import { PlansView } from "./PlansView";
 import styles from "../styles/Investments.module.css";
 
-type Tab = "overview" | Broker;
+type Tab = "overview" | "plans" | Broker;
 
 const TAB_KEY = "fire.investments.tab";
 
 const initialTab = (): Tab => {
   try {
     const saved = localStorage.getItem(TAB_KEY);
-    if (saved === "overview" || saved === "N26" || saved === "Commerzbank" || saved === "Sparkasse") return saved;
+    if (saved === "overview" || saved === "plans" || saved === "N26" || saved === "Commerzbank" || saved === "Sparkasse") return saved;
   } catch {
     // storage can be blocked: the overview is fine
   }
@@ -23,8 +24,10 @@ export const InvestmentsPage: React.FC = () => {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [brokers, setBrokers] = useState<Broker[]>(["N26", "Commerzbank"]);
   // A tab that no longer exists (a broker left without investments) falls back to the overview.
-  const active: Tab = tab === "overview" || brokers.includes(tab) ? tab : "overview";
-  const { data, brokers: known, loading, error, changeBooking } = useInvestments(active === "overview" ? null : active);
+  const active: Tab = tab === "overview" || tab === "plans" || brokers.includes(tab) ? tab : "overview";
+  const { data, brokers: known, loading, error, changeBooking, labelBooking } = useInvestments(
+    active === "overview" || active === "plans" ? null : active,
+  );
   if (known.join() !== brokers.join()) setBrokers(known);
   const colors = chartColors(useDarkMode());
 
@@ -59,17 +62,27 @@ export const InvestmentsPage: React.FC = () => {
             {b}
           </button>
         ))}
+        <button type="button" role="tab" aria-selected={active === "plans"}
+          className={`${styles.tab} ${active === "plans" ? styles.tabOn : ""}`} onClick={() => choose("plans")}>
+          Plans
+        </button>
       </div>
 
-      {error && <div className={`${styles.notice} ${styles.noticeError}`}>{error}</div>}
-      {!data && !error && <div className={styles.empty}>Loading...</div>}
+      {active === "plans" && (
+        <div className={styles.stack}>
+          <PlansView />
+        </div>
+      )}
 
-      {data && (
+      {active !== "plans" && error && <div className={`${styles.notice} ${styles.noticeError}`}>{error}</div>}
+      {active !== "plans" && !data && !error && <div className={styles.empty}>Loading...</div>}
+
+      {active !== "plans" && data && (
         <div className={`${styles.stack} ${loading ? styles.dim : ""}`}>
           {data.broker === null ? (
             <OverviewView data={data} onChange={changeBooking} />
           ) : (
-            <BrokerView data={data} broker={data.broker} onChange={changeBooking} />
+            <BrokerView data={data} broker={data.broker} onChange={changeBooking} onLabel={labelBooking} />
           )}
         </div>
       )}

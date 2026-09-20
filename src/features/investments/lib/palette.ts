@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Broker } from "../types";
-import { UNKNOWN } from "../types";
+import { MANUAL, UNKNOWN } from "../types";
 
 // Categorical slots in their fixed order, validated for both surfaces (adjacent pairs, colour-blind
 // safe). Colour follows the thing, never its rank: a broker keeps its colour on every page.
@@ -12,6 +12,7 @@ const SLOTS = {
 export interface ChartColors {
   slots: string[];
   neutral: string; // "Unknown" / "Other": something that is not a series
+  manual: string; // buys outside every plan: a second, darker neutral
   surface: string;
   grid: string;
   axis: string; // text tokens for ticks and labels
@@ -22,6 +23,7 @@ export interface ChartColors {
 export const chartColors = (dark: boolean): ChartColors => ({
   slots: dark ? SLOTS.dark : SLOTS.light,
   neutral: dark ? "#6f6f6a" : "#a3a29c",
+  manual: dark ? "#a1a1aa" : "#52525b",
   surface: dark ? "#18181b" : "#ffffff",
   grid: dark ? "#2e2e33" : "#ececea",
   axis: dark ? "#a1a1aa" : "#71717a",
@@ -48,6 +50,7 @@ export const instrumentColors = (colors: ChartColors, names: string[]): Record<s
     out[name] = i < colors.slots.length - 1 ? colors.slots[i] : colors.neutral;
   });
   out[UNKNOWN] = colors.neutral;
+  out[MANUAL] = colors.manual;
   out[OTHER] = colors.neutral;
   return out;
 };

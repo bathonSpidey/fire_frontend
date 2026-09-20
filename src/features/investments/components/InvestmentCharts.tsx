@@ -4,6 +4,7 @@ import {
 } from "recharts";
 import { euro, euroShort } from "../lib/format";
 import { OTHER, brokerColor, chartColors, instrumentColors, useDarkMode } from "../lib/palette";
+import { MANUAL, UNKNOWN } from "../types";
 import type { Instrument, InvestMonth } from "../types";
 import styles from "../styles/Investments.module.css";
 
@@ -152,11 +153,12 @@ export const MonthlyChart: React.FC<{
       by === "broker"
         ? Array.from(new Set(months.flatMap((m) => Object.keys(m.by_broker))))
         : instruments.map((i) => i.name);
-    const shown = by === "broker" ? names : names.filter((n) => n !== "Unknown").slice(0, cap);
+    const special = (n: string) => n === UNKNOWN || n === MANUAL;
+    const shown = by === "broker" ? names : names.filter((n) => !special(n)).slice(0, cap);
     const palette = by === "broker" ? null : instrumentColors(colors, shown);
-    const folded = names.filter((n) => n !== "Unknown" && !shown.includes(n));
+    const folded = names.filter((n) => !special(n) && !shown.includes(n));
     const keys = by === "broker" ? shown : [...shown, ...(folded.length > 0 ? [OTHER] : [])];
-    const wants = (n: string) => (shown.includes(n) ? n : n === "Unknown" ? "Unknown" : OTHER);
+    const wants = (n: string) => (shown.includes(n) || special(n) ? n : OTHER);
     const all: Series[] = keys.map((k) => ({
       key: k,
       color: by === "broker" ? brokerColor(colors, k) : (palette as Record<string, string>)[k],
@@ -170,8 +172,11 @@ export const MonthlyChart: React.FC<{
       });
       return row;
     });
-    // "Unknown" is a real part of the picture: shown last, in the neutral.
-    if (by === "instrument" && rows.some((r) => "Unknown" in r)) all.push({ key: "Unknown", color: colors.neutral });
+    // Buys outside every plan, and buys nobody can name, are real parts of the picture: shown last, in neutrals.
+    if (by === "instrument") {
+      if (rows.some((r) => MANUAL in r)) all.push({ key: MANUAL, color: colors.manual });
+      if (rows.some((r) => UNKNOWN in r)) all.push({ key: UNKNOWN, color: colors.neutral });
+    }
     return { series: all, data: rows };
   }, [months, by, instruments, colors]);
 

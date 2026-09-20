@@ -53,5 +53,24 @@ export const useInvestments = (broker: Broker | null) => {
 
   // `loading` is only true while the wanted page is not the one on screen.
   const stale = data !== null && data.broker !== broker;
-  return { data, brokers, loading: loading || stale, error, changeBooking };
+  // The household says what one booking was (a manual buy, a sell), or takes it back.
+  const labelBooking = async (id: number, instrument: string | null) => {
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/investments/bookings/${id}/instrument`, {
+        method: instrument === null ? "DELETE" : "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: instrument === null ? undefined : JSON.stringify({ instrument }),
+      });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => null);
+        throw new Error(detail?.detail ?? `Request failed (status ${res.status})`);
+      }
+      setReloadKey((k) => k + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "That did not work");
+    }
+  };
+
+  return { data, brokers, loading: loading || stale, error, changeBooking, labelBooking };
 };
