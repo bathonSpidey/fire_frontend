@@ -21,6 +21,7 @@ export const useReceiptUpload = () => {
   const [owners, setOwners] = useState<string[]>([]);
   const [owner, setOwnerState] = useState<string>(rememberedOwner());
   const [asOneDocument, setAsOneDocument] = useState(false);
+  const [bankHint, setBankHint] = useState(""); // "" = let Claude work it out
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rejected, setRejected] = useState<UploadResponse["rejected"]>([]);
@@ -37,7 +38,7 @@ export const useReceiptUpload = () => {
 
   const refreshJobs = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/documents/jobs?limit=30`);
+      const res = await fetch(`${API_BASE}/documents/jobs?limit=12`);
       if (res.ok) setJobs(await res.json());
     } catch {
       /* backend briefly unreachable: keep showing the last known list */
@@ -53,7 +54,7 @@ export const useReceiptUpload = () => {
         setOwnerState((current) => (list.includes(current) ? current : (list[0] ?? "")));
       })
       .catch(() => setError("Cannot reach the backend. Is it running?"));
-    fetch(`${API_BASE}/documents/jobs?limit=30`)
+    fetch(`${API_BASE}/documents/jobs?limit=12`)
       .then((res) => res.json())
       .then(setJobs)
       .catch(() => undefined);
@@ -86,6 +87,7 @@ export const useReceiptUpload = () => {
       const formData = new FormData();
       formData.append("owner", owner);
       formData.append("group", String(oneDocument && toUpload.length > 1));
+      formData.append("bank_hint", bankHint);
       toUpload.forEach((file) => formData.append("files", file));
       const res = await fetch(`${API_BASE}/documents/upload`, { method: "POST", body: formData });
       if (!res.ok) {
@@ -106,20 +108,33 @@ export const useReceiptUpload = () => {
 
   const uploadReceipts = () => uploadFiles(files, asOneDocument);
 
-  // Queue a failed document again without uploading it again.
-  const retryJob = async (jobId: number) => {
+  // Actions on an existing job (retry, confirm, read again). The backend explains refusals.
+  const jobAction = async (path: string, body?: object) => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/documents/jobs/${jobId}/retry`, { method: "POST" });
+      const res = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body ?? {}),
+      });
       if (!res.ok) {
         const detail = await res.json().catch(() => null);
-        throw new Error(detail?.detail ?? `Could not retry (status ${res.status})`);
+        throw new Error(detail?.detail ?? `That did not work (status ${res.status})`);
       }
       await refreshJobs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not retry");
+      setError(err instanceof Error ? err.message : "That did not work");
     }
   };
+
+  // Queue a failed document again without uploading it again.
+  const retryJob = (jobId: number) => jobAction(`/documents/jobs/${jobId}/retry`);
+  // The household checked a flagged document; a receipt's date can be corrected on the way.
+  const confirmJob = (jobId: number, purchaseDate?: string) =>
+    jobAction(`/documents/jobs/${jobId}/confirm`, purchaseDate ? { purchase_date: purchaseDate } : {});
+  // Claude got it wrong: remove what was stored and read the same file again (optionally as a bank).
+  const rereadJob = (jobId: number, bank?: string) =>
+    jobAction(`/documents/jobs/${jobId}/reread`, bank ? { bank_hint: bank } : {});
 
   return {
     files,
@@ -128,6 +143,8 @@ export const useReceiptUpload = () => {
     setOwner,
     asOneDocument,
     setAsOneDocument,
+    bankHint,
+    setBankHint,
     uploading,
     error,
     rejected,
@@ -137,5 +154,7 @@ export const useReceiptUpload = () => {
     uploadReceipts,
     uploadFiles,
     retryJob,
+    confirmJob,
+    rereadJob,
   };
 };

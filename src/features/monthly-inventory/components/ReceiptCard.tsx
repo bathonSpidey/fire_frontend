@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { MonthlyReceiptInventory } from "../types";
+import { CategorySelect } from "../../../shared/components/CategorySelect";
 import styles from "../styles/MonthlyInventory.module.css";
 
 interface ReceiptCardProps {
@@ -11,6 +12,7 @@ interface ReceiptCardProps {
     receiptId: number,
     itemId: number,
   ) => Promise<void>;
+  onItemCategoryChange: (itemId: number, receiptId: number, category: string) => Promise<void>;
 }
 
 const ChevronDown: React.FC<{ className?: string }> = ({ className }) => (
@@ -33,6 +35,7 @@ const ChevronDown: React.FC<{ className?: string }> = ({ className }) => (
 export const ReceiptCard: React.FC<ReceiptCardProps> = ({
   receipt,
   onItemStatusChange,
+  onItemCategoryChange,
 }) => {
   // Set to true if you prefer receipts open by default
   const [isExpanded, setIsExpanded] = useState(false);
@@ -94,13 +97,12 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({
                   <td style={{ fontWeight: 500 }}>
                     {item.name} {item.brand ? `(${item.brand})` : ""}
                   </td>
-                  <td>
-                    <span
-                      className={styles.pill}
-                      style={{ backgroundColor: "var(--surface-raised)" }}
-                    >
-                      {item.category}
-                    </span>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <CategorySelect
+                      value={item.spend_category}
+                      flow="expense"
+                      onChange={(key) => onItemCategoryChange(item.id, receipt.id, key)}
+                    />
                   </td>
                   <td>{item.quantity}</td>
                   <td>{item.unit_cost.toFixed(2)}€</td>

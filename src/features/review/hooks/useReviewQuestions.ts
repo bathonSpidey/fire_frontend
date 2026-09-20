@@ -3,7 +3,7 @@ import { API_BASE } from "../../../core/api";
 
 export interface ReviewQuestion {
   id: number;
-  kind: "receipt_match" | "transfer_match";
+  kind: "receipt_match" | "transfer_match" | "mirror_match";
   question: string;
   transaction_id: number;
   receipt_id: number | null;

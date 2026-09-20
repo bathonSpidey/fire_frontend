@@ -5,7 +5,8 @@ export interface InventoryItem {
   brand: string | null;
   quantity: number;
   unit_cost: number;
-  category: string;
+  category: string; // coarse pantry group
+  spend_category?: string | null; // the spending category (editable)
   status: string;
   storage_condition: string;
   date_purchased: string;

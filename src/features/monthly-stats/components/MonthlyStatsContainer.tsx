@@ -6,13 +6,15 @@ import styles from "../styles/MonthlyStats.module.css";
 interface ContainerProps {
   month: string;
   year: number;
+  refreshKey?: number;
 }
 
 export const MonthlyStatsContainer: React.FC<ContainerProps> = ({
   month,
   year,
+  refreshKey,
 }) => {
-  const { stats, previousStats, loading, error } = useMonthlyStats(month, year);
+  const { stats, previousStats, loading, error } = useMonthlyStats(month, year, refreshKey);
 
   if (loading) {
     return <div className={styles.loadingMessage}>Updating metrics...</div>;

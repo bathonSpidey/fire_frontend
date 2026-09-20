@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import type { BankStatementResponse } from "../../statement-upload/types";
+import { CategorySelect } from "../../../shared/components/CategorySelect";
+import { useCategoryOptions } from "../../../shared/hooks/useCategoryOptions";
 import styles from "../styles/StatementManage.module.css";
 
 const ChevronDown: React.FC = () => (
@@ -20,10 +22,12 @@ const ChevronDown: React.FC = () => (
 
 interface Props {
   statement: BankStatementResponse;
+  onCategoryChange: (txId: number, category: string) => Promise<void>;
 }
 
-export const StatementAccordion: React.FC<Props> = ({ statement }) => {
+export const StatementAccordion: React.FC<Props> = ({ statement, onCategoryChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { byKey } = useCategoryOptions();
 
   const balanceDelta = statement.closing_balance - statement.starting_balance;
   const closingClass =
@@ -79,6 +83,7 @@ export const StatementAccordion: React.FC<Props> = ({ statement }) => {
                 <tr>
                   <th style={{ width: "110px" }}>Date</th>
                   <th>Description</th>
+                  <th style={{ width: "200px" }}>Category</th>
                   <th style={{ textAlign: "right" }}>Amount €</th>
                 </tr>
               </thead>
@@ -86,7 +91,11 @@ export const StatementAccordion: React.FC<Props> = ({ statement }) => {
                 {statement.transactions.map((tx, idx) => {
                   // Own money moving between accounts is neither income nor spending.
                   const isTransfer = tx.kind === "internal_transfer";
-                  const tag = isTransfer
+                  // A PayPal row explained by a bank booking is the same money: shown, but not counted.
+                  const isDetail = tx.mirror_of != null;
+                  const tag = isDetail
+                    ? "PayPal detail (counted on the bank booking)"
+                    : isTransfer
                     ? tx.transfer_group
                       ? "Transfer (matched)"
                       : "Transfer (other side not uploaded yet)"
@@ -104,10 +113,25 @@ export const StatementAccordion: React.FC<Props> = ({ statement }) => {
                       )}
                       {tx.description}
                     </td>
+                    <td>
+                      {tx.id == null || isTransfer || tx.kind === "investment" ? (
+                        <span style={{ opacity: 0.5 }}>—</span>
+                      ) : isDetail ? (
+                        <span style={{ opacity: 0.6 }} title="Counted on the bank booking, change it there">
+                          {(tx.category && byKey.get(tx.category)?.label) || "—"}
+                        </span>
+                      ) : (
+                        <CategorySelect
+                          value={tx.category}
+                          flow={tx.kind === "income" || tx.kind === "refund" || tx.amount > 0 ? "income" : "expense"}
+                          onChange={(key) => onCategoryChange(tx.id as number, key)}
+                        />
+                      )}
+                    </td>
                     <td
-                      style={{ textAlign: "right", opacity: isTransfer ? 0.6 : 1 }}
+                      style={{ textAlign: "right", opacity: isTransfer || isDetail ? 0.6 : 1 }}
                       className={
-                        isTransfer || tx.kind === "investment"
+                        isTransfer || isDetail || tx.kind === "investment"
                           ? undefined
                           : tx.amount >= 0
                             ? styles.incomeAmount

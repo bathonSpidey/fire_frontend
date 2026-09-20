@@ -7,6 +7,7 @@ import styles from "../styles/Review.module.css";
 const KIND_LABEL: Record<ReviewQuestion["kind"], string> = {
   receipt_match: "Receipt <-> bank payment",
   transfer_match: "Transfer between your accounts",
+  mirror_match: "PayPal payment <-> bank booking",
 };
 
 export const ReviewPage: React.FC = () => {

@@ -17,6 +17,9 @@ export const StatementManagePage: React.FC = () => {
     selectedStatement,
     loading,
     error,
+    saveError,
+    statsVersion,
+    changeCategory,
     handlePrev,
     handleNext,
   } = useManageStatements();
@@ -32,13 +35,14 @@ export const StatementManagePage: React.FC = () => {
       />
 
       {/* Fully decoupled stats engine layer */}
-      <MonthlyStatsContainer month={month} year={year} />
+      <MonthlyStatsContainer month={month} year={year} refreshKey={statsVersion} />
 
       {loading && (
         <div className={styles.infoMessage}>Loading statements...</div>
       )}
 
       {error && <div className={styles.errorMessage}>{error}</div>}
+      {saveError && <div className={styles.errorMessage}>{saveError}</div>}
 
       {!loading && !error && (
         <>
@@ -57,7 +61,7 @@ export const StatementManagePage: React.FC = () => {
               </div>
 
               {selectedStatement && (
-                <StatementAccordion statement={selectedStatement} />
+                <StatementAccordion statement={selectedStatement} onCategoryChange={changeCategory} />
               )}
             </>
           ) : (

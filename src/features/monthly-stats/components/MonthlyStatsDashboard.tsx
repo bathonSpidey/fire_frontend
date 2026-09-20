@@ -11,6 +11,35 @@ import { CategoryDonutChart } from "./CategoryDonutChart";
 import { CategoryBreakdownList } from "./CategoryBreakdownList";
 import styles from "../styles/MonthlyStats.module.css";
 
+// One line saying what the month is built from, and what is still missing (nothing is hidden).
+const SourceNote: React.FC<{ stats: MonthlyStatsResponse }> = ({ stats }) => {
+  const sources = stats.sources;
+  if (!sources) return null;
+  const receipts = `${sources.receipts} receipt${sources.receipts === 1 ? "" : "s"}`;
+  const hasRealBank = sources.statements.some((bank) => bank !== "PayPal");
+  const parts = [
+    sources.statements.length > 0 ? `${sources.statements.join(", ")} statement` : null,
+    sources.receipts > 0 ? receipts : null,
+  ].filter(Boolean);
+  return (
+    <div
+      role="note"
+      style={{
+        padding: "0.75rem 1rem",
+        borderRadius: "var(--radius-lg)",
+        border: `0.5px solid ${hasRealBank ? "var(--border)" : "var(--warning-border)"}`,
+        background: hasRealBank ? "transparent" : "var(--warning-subtle)",
+        fontSize: "0.875rem",
+        lineHeight: 1.5,
+      }}
+    >
+      Based on {parts.join(" and ")}.
+      {!hasRealBank &&
+        " No bank account statement for this month yet: income, investments and fixed costs such as rent appear when it is uploaded."}
+    </div>
+  );
+};
+
 interface DashboardProps {
   stats: MonthlyStatsResponse | null;
   previousStats: MonthlyStatsResponse | null;
@@ -40,6 +69,7 @@ export const MonthlyStatsDashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className={styles.container}>
+      <SourceNote stats={stats} />
       <div className={styles.kpiGrid}>
         <div className={styles.kpiCard}>
           <span className={styles.label}>Gross income</span>

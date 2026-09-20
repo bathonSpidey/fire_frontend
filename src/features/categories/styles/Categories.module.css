@@ -47,8 +47,8 @@
   padding: 8px 10px;
   border-radius: var(--radius-lg);
   border: 0.5px solid var(--border);
-  background: transparent;
-  color: inherit;
+  background-color: var(--surface);
+  color: var(--text-primary);
   font: inherit;
 }
 

@@ -13,6 +13,7 @@ interface UseMonthlyStatsResult {
 export const useMonthlyStats = (
   month: string,
   year: number,
+  refreshKey = 0, // change it to fetch again (e.g. after a category was edited)
 ): UseMonthlyStatsResult => {
   const [stats, setStats] = useState<MonthlyStatsResponse | null>(null);
   const [previousStats, setPreviousStats] =
@@ -57,7 +58,7 @@ export const useMonthlyStats = (
     return () => {
       isCurrent = false;
     };
-  }, [month, year]);
+  }, [month, year, refreshKey]);
 
   return { stats, previousStats, loading, error };
 };

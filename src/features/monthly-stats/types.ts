@@ -8,6 +8,12 @@ export interface CategoryStat {
   fixed?: boolean;
 }
 
+// What a month's numbers are built from
+export interface StatsSources {
+  statements: string[]; // banks whose statement is uploaded for the month
+  receipts: number; // receipts dated in the month
+}
+
 export interface MonthlyStatsResponse {
   month: string;
   year: number;
@@ -18,6 +24,7 @@ export interface MonthlyStatsResponse {
   total_invested: number;
   fixed_vs_variable_ratio: string;
   categories: Record<string, CategoryStat>;
+  sources?: StatsSources | null;
 }
 
 export interface MonthlyStatsWithTrend {

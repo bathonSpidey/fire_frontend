@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import { useReceiptUpload } from "../hooks/useReceiptUpload";
 import { isActive } from "../types";
 import type { IngestJob } from "../types";
+
+const BANKS = ["Sparkasse", "N26", "Commerzbank", "PayPal"];
 import shared from "../../../shared/styles/upload.module.css";
 import styles from "../styles/ReceiptUpload.module.css";
 
@@ -45,6 +47,7 @@ const KIND_LABEL: Record<IngestJob["kind"], string> = {
 export const ReceiptUploadSection: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showOlder, setShowOlder] = useState(false);
   const {
     files,
     owners,
@@ -52,6 +55,8 @@ export const ReceiptUploadSection: React.FC = () => {
     setOwner,
     asOneDocument,
     setAsOneDocument,
+    bankHint,
+    setBankHint,
     uploading,
     error,
     rejected,
@@ -59,6 +64,8 @@ export const ReceiptUploadSection: React.FC = () => {
     handleFileChange,
     uploadReceipts,
     retryJob,
+    confirmJob,
+    rereadJob,
   } = useReceiptUpload();
 
   const onDrop = (e: React.DragEvent) => {
@@ -70,6 +77,10 @@ export const ReceiptUploadSection: React.FC = () => {
       } as unknown as React.ChangeEvent<HTMLInputElement>);
     }
   };
+
+  const RECENT_COUNT = 4; // keep the page short; older jobs are one click away
+  const visibleJobs = showOlder ? jobs : jobs.slice(0, RECENT_COUNT);
+  const olderCount = jobs.length - RECENT_COUNT;
 
   const dropzoneClass = [
     shared.dropzone,
@@ -108,6 +119,24 @@ export const ReceiptUploadSection: React.FC = () => {
             {name}
           </button>
         ))}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        <span className={shared.dzSub}>Bank statement screenshot from</span>
+        <select
+          value={bankHint}
+          onChange={(e) => setBankHint(e.target.value)}
+          className={shared.fileChip}
+          style={{ cursor: "pointer" }}
+          aria-label="Which bank the screenshots are from"
+        >
+          <option value="">Not sure / not a screenshot</option>
+          {BANKS.map((bank) => (
+            <option key={bank} value={bank}>
+              {bank}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div
@@ -211,16 +240,75 @@ export const ReceiptUploadSection: React.FC = () => {
       {jobs.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
           <div className={shared.dzSub}>Recent uploads</div>
-          {jobs.map((job) => (
-            <JobRow key={job.id} job={job} onRetry={() => retryJob(job.id)} />
+          {visibleJobs.map((job) => (
+            <JobRow
+              key={job.id}
+              job={job}
+              onRetry={() => retryJob(job.id)}
+              onConfirm={(date) => confirmJob(job.id, date)}
+              onReread={(bank) => rereadJob(job.id, bank)}
+            />
           ))}
+          {olderCount > 0 && (
+            <button
+              type="button"
+              className={shared.dzSub}
+              style={{ cursor: "pointer", background: "none", border: "none", textAlign: "left", padding: 0 }}
+              onClick={() => setShowOlder(!showOlder)}
+            >
+              {showOlder ? "Show fewer" : `Show older (${olderCount})`}
+            </button>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-const JobRow: React.FC<{ job: IngestJob; onRetry: () => void }> = ({ job, onRetry }) => {
+const JobActions: React.FC<{
+  job: IngestJob;
+  onConfirm: (date?: string) => void;
+  onReread: (bank?: string) => void;
+}> = ({ job, onConfirm, onReread }) => {
+  const [date, setDate] = useState("");
+  const [bank, setBank] = useState("");
+  const needsCheck = job.status === "needs_review";
+  return (
+    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginTop: "4px" }}>
+      {needsCheck && job.kind === "receipt" && (
+        <label className={shared.dzSub}>
+          Purchase date{" "}
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </label>
+      )}
+      {needsCheck && (
+        <button type="button" className={shared.fileChip} style={{ cursor: "pointer" }} onClick={() => onConfirm(date || undefined)}>
+          {date ? "Save date and confirm" : "Looks fine"}
+        </button>
+      )}
+      {job.kind === "statement" && (
+        <select value={bank} onChange={(e) => setBank(e.target.value)} className={shared.fileChip} aria-label="Read again as bank">
+          <option value="">Bank: let Claude decide</option>
+          {BANKS.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+      )}
+      <button type="button" className={shared.fileChip} style={{ cursor: "pointer" }} onClick={() => onReread(bank || undefined)}>
+        Read again{job.kind === "statement" && bank ? ` as ${bank}` : ""}
+      </button>
+    </div>
+  );
+};
+
+const JobRow: React.FC<{
+  job: IngestJob;
+  onRetry: () => void;
+  onConfirm: (date?: string) => void;
+  onReread: (bank?: string) => void;
+}> = ({ job, onRetry, onConfirm, onReread }) => {
   const active = isActive(job);
   const cardClass =
     job.status === "failed"
@@ -238,6 +326,11 @@ const JobRow: React.FC<{ job: IngestJob; onRetry: () => void }> = ({ job, onRetr
         <span className={shared.statPill}>{STATUS_LABEL[job.status]}</span>
       </div>
       {job.message && !active && <div className={styles.warningMeta}>{job.message}</div>}
+      {(job.status === "saved" || job.status === "needs_review") &&
+        (job.kind === "receipt" || job.kind === "statement") &&
+        !(job.message ?? "").includes("Read again as job") && (
+          <JobActions job={job} onConfirm={onConfirm} onReread={onReread} />
+        )}
       {job.status === "failed" && !(job.message ?? "").includes("Retried as job") && (
         <div>
           <button type="button" className={shared.fileChip} style={{ cursor: "pointer" }} onClick={onRetry}>

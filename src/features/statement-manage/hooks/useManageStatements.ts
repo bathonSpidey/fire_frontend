@@ -11,6 +11,8 @@ export const useManageStatements = () => {
   const [activeBank, setActiveBank] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [statsVersion, setStatsVersion] = useState(0); // bumps when a change affects the month numbers
 
   useEffect(() => {
     const fetchStatements = async () => {
@@ -51,12 +53,38 @@ export const useManageStatements = () => {
     setYear(next.year);
   };
 
+  // Change one booking's category; the backend refuses unsuitable ones with a reason.
+  const changeCategory = async (txId: number, category: string) => {
+    setSaveError(null);
+    try {
+      const res = await fetch(`${API_BASE}/entries/transactions/${txId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category }),
+      });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => null);
+        throw new Error(detail?.detail ?? `Could not save (status ${res.status})`);
+      }
+      setStatements((all) =>
+        all.map((st) => ({
+          ...st,
+          transactions: st.transactions.map((tx) => (tx.id === txId ? { ...tx, category } : tx)),
+        })),
+      );
+      setStatsVersion((v) => v + 1);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Could not save the category");
+    }
+  };
+
   const selectedStatement = statements.find((s) => s.bank === activeBank) || null;
 
   return {
     month, year, setYear,
     statements, activeBank, setActiveBank,
     selectedStatement, loading, error,
+    saveError, statsVersion, changeCategory,
     handlePrev, handleNext
   };
 };

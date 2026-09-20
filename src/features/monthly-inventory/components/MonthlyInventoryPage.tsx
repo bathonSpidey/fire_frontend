@@ -80,6 +80,8 @@ export const MonthlyInventoryPage: React.FC = () => {
     handlePrevMonth,
     handleNextMonth,
     updateItemStatus,
+    updateItemCategory,
+    saveError,
     reload,
   } = useMonthlyInventory();
   const { uploadFiles, uploading, owner, jobs } = useReceiptUpload();
@@ -138,6 +140,7 @@ export const MonthlyInventoryPage: React.FC = () => {
         <div className={styles.infoMessage}>Loading inventory logs...</div>
       )}
       {error && <div className={styles.errorMessage}>{error}</div>}
+      {saveError && <div className={styles.errorMessage}>{saveError}</div>}
 
       {!loading && !error && (
         <>
@@ -194,6 +197,7 @@ export const MonthlyInventoryPage: React.FC = () => {
                 key={receipt.id}
                 receipt={receipt}
                 onItemStatusChange={updateItemStatus}
+                onItemCategoryChange={updateItemCategory}
               />
             ))
           )}

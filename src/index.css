@@ -30,6 +30,11 @@
   --success-border: rgba(16, 185, 129, 0.3);
   --success-text: #065f46;
 
+  --warning: #f59e0b;
+  --warning-subtle: rgba(245, 158, 11, 0.16);
+  --warning-border: rgba(217, 119, 6, 0.55);
+  --warning-text: #92400e;
+
   --danger: #ef4444;
   --danger-subtle: rgba(239, 68, 68, 0.08);
   --danger-border: rgba(239, 68, 68, 0.3);
@@ -45,9 +50,13 @@
 
   --transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   --transition-all: all 0.2s ease;
+
+  /* Native controls (dropdown lists, date pickers, scrollbars) follow the app theme */
+  color-scheme: light;
 }
 
 [data-theme='dark'] {
+  color-scheme: dark;
   --background: #09090b;
   --surface: #18181b;
   --surface-raised: #27272a;
@@ -67,6 +76,11 @@
   --success-border: rgba(52, 211, 153, 0.3);
   --success-text: #6ee7b7;
 
+  --warning: #fbbf24;
+  --warning-subtle: rgba(251, 191, 36, 0.14);
+  --warning-border: rgba(251, 191, 36, 0.45);
+  --warning-text: #fcd34d;
+
   --danger: #f87171;
   --danger-subtle: rgba(248, 113, 113, 0.1);
   --danger-border: rgba(248, 113, 113, 0.3);
@@ -78,4 +92,12 @@ body {
   color: var(--text-primary);
   transition: var(--transition);
   min-height: 100vh;
+}
+
+/* The open list of a dropdown is drawn by the browser: give it the theme colours explicitly so
+   light text can never land on a white list (or dark text on a dark one). */
+select option,
+select optgroup {
+  background-color: var(--surface);
+  color: var(--text-primary);
 }
