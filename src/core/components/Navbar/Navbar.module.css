@@ -91,3 +91,55 @@
 .icon {
     font-size: 1.125rem;
 }
+
+.signOut {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: 8px 14px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.signOut:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-raised);
+}
+
+/* Phones: brand and buttons on the first line, the links on a line of their own that scrolls sideways. */
+@media (max-width: 900px) {
+    .navbar {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 8px 12px;
+        gap: 6px 12px;
+    }
+
+    .leftSection {
+        display: contents;
+    }
+
+    .brand {
+        order: 1;
+    }
+
+    .navActions {
+        order: 2;
+        margin-left: auto;
+        gap: 8px;
+    }
+
+    .navLinks {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        gap: 4px;
+        padding-bottom: 4px;
+    }
+
+    .navLink {
+        white-space: nowrap;
+        padding: 8px 12px;
+    }
+}

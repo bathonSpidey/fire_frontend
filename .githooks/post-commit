@@ -1,0 +1,21 @@
+#!/bin/sh
+# After a commit that changed the web app: build it, so the live app (laptop and phone) has the
+# change. The server reads the build on every request: no restart needed, just reload the page.
+# Skip once with:  FIRE_NO_BUILD=1 git commit ...
+[ -n "$FIRE_NO_BUILD" ] && exit 0
+
+top=$(git rev-parse --show-toplevel)
+changed=$(git diff-tree --no-commit-id --name-only -r --root HEAD)
+if ! echo "$changed" | grep -Eq '^(src|public)/|^index\.html$|^package(-lock)?\.json$|^vite\.config|^tsconfig'; then
+  exit 0
+fi
+
+cd "$top" || exit 0
+echo "[post-commit] building the web app for the live app..."
+if npm run build > build.log 2>&1; then
+  echo "[post-commit] built: reload the page to see it"
+else
+  # The commit is already made; say clearly that the live app still has the previous version.
+  echo "[post-commit] BUILD FAILED, the live app still has the previous version. See build.log"
+fi
+exit 0

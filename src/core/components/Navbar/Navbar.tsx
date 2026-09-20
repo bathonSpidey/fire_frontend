@@ -1,11 +1,13 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
 import { useTheme } from "../../hooks/useTheme";
+import { useAuth } from "../../auth/AuthContext";
 import { useReviewQuestions } from "../../../features/review/hooks/useReviewQuestions";
 import styles from "./Navbar.module.css";
 
 export const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const { signOut } = useAuth();
   const { questions } = useReviewQuestions(30000); // badge: how many yes/no questions wait
 
   // Helper to cleanly apply active classes from the CSS module
@@ -46,6 +48,9 @@ export const Navbar: React.FC = () => {
       </div>
 
       <div className={styles.navActions}>
+        <button className={styles.signOut} onClick={signOut}>
+          Sign out
+        </button>
         <button
           className={styles.themeToggle}
           onClick={toggleTheme}

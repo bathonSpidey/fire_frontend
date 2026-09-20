@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./core/components/Navbar/Navbar";
+import { ClaudeBanner } from "./core/components/ClaudeBanner";
 import { UploadPage } from "./features/statement-upload/components/UploadPage";
 import { StatementManagePage } from "./features/statement-manage/components/StatementManagePage";
 import { InventoryPage } from "./features/inventory/components/InventoryPage";
@@ -12,7 +13,8 @@ export function App() {
   return (
     <>
       <Navbar />
-      <main style={{ padding: "0 24px" }}>
+      <ClaudeBanner />
+      <main style={{ padding: "0 clamp(12px, 4vw, 24px)" }}>
         <Routes>
           <Route path="/" element={<Navigate to="/manage" />} />
           <Route path="/upload" element={<UploadPage />} />

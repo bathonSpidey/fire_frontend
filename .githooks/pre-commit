@@ -1,0 +1,21 @@
+#!/bin/sh
+# Before every commit that touches the web app: type-check and lint, so a broken build never
+# gets committed (and then built into the live app by the post-commit hook).
+# Skip once with:  git commit --no-verify        Force the checks with:  FIRE_HOOK_FORCE=1 sh .githooks/pre-commit
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+changed=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$FIRE_HOOK_FORCE" ] && ! echo "$changed" | grep -Eq '^(src|public)/|^index\.html$|^package(-lock)?\.json$|^vite\.config|^tsconfig|^eslint\.config'; then
+  exit 0
+fi
+
+echo "[pre-commit] checking the web app (types + lint)..."
+if ! npx tsc -b; then
+  echo "[pre-commit] Type errors found. Commit stopped."
+  exit 1
+fi
+if ! npx eslint src; then
+  echo "[pre-commit] Lint problems found. Commit stopped."
+  exit 1
+fi
+echo "[pre-commit] web app OK"

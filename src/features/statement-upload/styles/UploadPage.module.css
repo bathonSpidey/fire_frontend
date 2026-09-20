@@ -5,6 +5,7 @@
  */
 
 .container {
+    box-sizing: border-box;
     max-width: 520px;
     margin: 40px auto;
     padding: 2rem;
@@ -14,4 +15,18 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+}
+
+/* Children of a flex column default to min-width:auto and would stretch the card with long text. */
+.container > * {
+    min-width: 0;
+}
+
+/* Phones: use the width instead of margins and padding. */
+@media (max-width: 600px) {
+    .container {
+        margin: 12px auto;
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+    }
 }

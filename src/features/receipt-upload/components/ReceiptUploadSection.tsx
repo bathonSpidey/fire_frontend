@@ -271,10 +271,11 @@ const JobActions: React.FC<{
   onReread: (bank?: string) => void;
 }> = ({ job, onConfirm, onReread }) => {
   const [date, setDate] = useState("");
-  const [bank, setBank] = useState("");
+  // Reading again starts from what was already chosen at upload: never ask for the bank twice.
+  const [bank, setBank] = useState(job.hint ?? "");
   const needsCheck = job.status === "needs_review";
   return (
-    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginTop: "4px" }}>
+    <div className={styles.jobActions}>
       {needsCheck && job.kind === "receipt" && (
         <label className={shared.dzSub}>
           Purchase date{" "}
@@ -282,12 +283,15 @@ const JobActions: React.FC<{
         </label>
       )}
       {needsCheck && (
-        <button type="button" className={shared.fileChip} style={{ cursor: "pointer" }} onClick={() => onConfirm(date || undefined)}>
+        <button type="button" className={`${shared.fileChip} ${styles.actionChip}`} onClick={() => onConfirm(date || undefined)}>
           {date ? "Save date and confirm" : "Looks fine"}
         </button>
       )}
+      {job.kind === "statement" && job.hint && (
+        <span className={shared.dzSub}>Read as {job.hint}, as you chose.</span>
+      )}
       {job.kind === "statement" && (
-        <select value={bank} onChange={(e) => setBank(e.target.value)} className={shared.fileChip} aria-label="Read again as bank">
+        <select value={bank} onChange={(e) => setBank(e.target.value)} className={`${shared.fileChip} ${styles.actionChip}`} aria-label="Read again as bank">
           <option value="">Bank: let Claude decide</option>
           {BANKS.map((b) => (
             <option key={b} value={b}>
@@ -296,7 +300,7 @@ const JobActions: React.FC<{
           ))}
         </select>
       )}
-      <button type="button" className={shared.fileChip} style={{ cursor: "pointer" }} onClick={() => onReread(bank || undefined)}>
+      <button type="button" className={`${shared.fileChip} ${styles.actionChip}`} onClick={() => onReread(bank || undefined)}>
         Read again{job.kind === "statement" && bank ? ` as ${bank}` : ""}
       </button>
     </div>
@@ -310,30 +314,31 @@ const JobRow: React.FC<{
   onReread: (bank?: string) => void;
 }> = ({ job, onRetry, onConfirm, onReread }) => {
   const active = isActive(job);
-  const cardClass =
+  const cardClass = `${styles.jobCard} ${
     job.status === "failed"
-      ? shared.errorBox
+      ? styles.jobError
       : job.status === "duplicate" || job.status === "needs_review"
-        ? styles.warningCard
-        : shared.successCard;
+        ? styles.jobWarn
+        : styles.jobSuccess
+  }`;
   return (
     <div className={cardClass} role="status" aria-live="polite">
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+      <div className={styles.jobHead}>
         {active ? <span className={shared.spinner} aria-hidden="true" /> : null}
-        <strong>{job.original_name}</strong>
+        <strong className={styles.jobName}>{job.original_name}</strong>
         <span className={shared.statPill}>{job.owner}</span>
         <span className={shared.statPill}>{KIND_LABEL[job.kind]}</span>
         <span className={shared.statPill}>{STATUS_LABEL[job.status]}</span>
       </div>
-      {job.message && !active && <div className={styles.warningMeta}>{job.message}</div>}
+      {job.message && !active && <div className={styles.jobMessage}>{job.message}</div>}
       {(job.status === "saved" || job.status === "needs_review") &&
         (job.kind === "receipt" || job.kind === "statement") &&
         !(job.message ?? "").includes("Read again as job") && (
           <JobActions job={job} onConfirm={onConfirm} onReread={onReread} />
         )}
       {job.status === "failed" && !(job.message ?? "").includes("Retried as job") && (
-        <div>
-          <button type="button" className={shared.fileChip} style={{ cursor: "pointer" }} onClick={onRetry}>
+        <div className={styles.jobActions}>
+          <button type="button" className={`${shared.fileChip} ${styles.actionChip}`} onClick={onRetry}>
             Try again
           </button>
         </div>

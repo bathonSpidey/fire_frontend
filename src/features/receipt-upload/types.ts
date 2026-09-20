@@ -18,6 +18,7 @@ export interface IngestJob {
   message: string | null;
   receipt_id: number | null;
   cost_usd: number | null;
+  hint: string | null; // the bank chosen at upload
   created_at: string;
   finished_at: string | null;
 }
