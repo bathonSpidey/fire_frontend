@@ -83,23 +83,43 @@ export const StatementAccordion: React.FC<Props> = ({ statement }) => {
                 </tr>
               </thead>
               <tbody>
-                {statement.transactions.map((tx, idx) => (
+                {statement.transactions.map((tx, idx) => {
+                  // Own money moving between accounts is neither income nor spending.
+                  const isTransfer = tx.kind === "internal_transfer";
+                  const tag = isTransfer
+                    ? tx.transfer_group
+                      ? "Transfer (matched)"
+                      : "Transfer (other side not uploaded yet)"
+                    : tx.kind === "investment"
+                      ? "Investment"
+                      : null;
+                  return (
                   <tr key={idx}>
                     <td>{tx.date}</td>
-                    <td>{tx.description}</td>
+                    <td>
+                      {tag && (
+                        <span style={{ fontSize: "0.75rem", fontWeight: 600, marginRight: "8px", opacity: 0.7 }}>
+                          [{tag}]
+                        </span>
+                      )}
+                      {tx.description}
+                    </td>
                     <td
-                      style={{ textAlign: "right" }}
+                      style={{ textAlign: "right", opacity: isTransfer ? 0.6 : 1 }}
                       className={
-                        tx.amount >= 0
-                          ? styles.incomeAmount
-                          : styles.expenseAmount
+                        isTransfer || tx.kind === "investment"
+                          ? undefined
+                          : tx.amount >= 0
+                            ? styles.incomeAmount
+                            : styles.expenseAmount
                       }
                     >
                       {tx.amount >= 0 ? "+" : ""}
                       {tx.amount.toFixed(2)}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -11,9 +11,10 @@ interface GroupedCategories {
 }
 
 /**
- * Splits categories into income/expense groups, dropping transfers, and
+ * Splits categories into income/expense groups, dropping transfers and investments, and
  * sorts each group by total descending. Transfers are excluded entirely
- * per the classification rule (see categoryClassifier.ts).
+ * per the classification rule (see categoryClassifier.ts); investments are shown
+ * as the separate "Invested" figure.
  */
 export function groupCategoriesByType(
   categories: Record<string, CategoryStat>,
@@ -23,7 +24,7 @@ export function groupCategoriesByType(
 
   for (const [name, stat] of Object.entries(categories)) {
     const type = classifyCategory(name);
-    if (type === "transfer") continue;
+    if (type === "transfer" || type === "investment") continue;
 
     const entry: NamedCategoryStat = { name, ...stat };
     if (type === "income") {

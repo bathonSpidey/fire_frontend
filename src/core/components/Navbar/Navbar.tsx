@@ -1,10 +1,12 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
 import { useTheme } from "../../hooks/useTheme";
+import { useReviewQuestions } from "../../../features/review/hooks/useReviewQuestions";
 import styles from "./Navbar.module.css";
 
 export const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const { questions } = useReviewQuestions(30000); // badge: how many yes/no questions wait
 
   // Helper to cleanly apply active classes from the CSS module
   const getLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -27,6 +29,9 @@ export const Navbar: React.FC = () => {
           </NavLink>
           <NavLink to="/inventory" className={getLinkClass}>
             Inventory
+          </NavLink>
+          <NavLink to="/questions" className={getLinkClass}>
+            Questions{questions.length > 0 ? ` (${questions.length})` : ""}
           </NavLink>
           <NavLink to="/analytics" className={getLinkClass}>
             Analytics

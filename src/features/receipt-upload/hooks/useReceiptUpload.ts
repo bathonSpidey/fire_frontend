@@ -14,10 +14,13 @@ const rememberedOwner = (): string => {
   }
 };
 
+// One upload flow for everything: the backend lets Claude decide whether each document is a
+// receipt or a bank statement, and whether several images belong together.
 export const useReceiptUpload = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [owners, setOwners] = useState<string[]>([]);
   const [owner, setOwnerState] = useState<string>(rememberedOwner());
+  const [asOneDocument, setAsOneDocument] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rejected, setRejected] = useState<UploadResponse["rejected"]>([]);
@@ -34,7 +37,7 @@ export const useReceiptUpload = () => {
 
   const refreshJobs = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/receipts/jobs?limit=15`);
+      const res = await fetch(`${API_BASE}/documents/jobs?limit=30`);
       if (res.ok) setJobs(await res.json());
     } catch {
       /* backend briefly unreachable: keep showing the last known list */
@@ -43,14 +46,14 @@ export const useReceiptUpload = () => {
 
   // Load household members and recent jobs once; pick a sensible default owner.
   useEffect(() => {
-    fetch(`${API_BASE}/receipts/owners`)
+    fetch(`${API_BASE}/documents/owners`)
       .then((res) => res.json())
       .then((list: string[]) => {
         setOwners(list);
         setOwnerState((current) => (list.includes(current) ? current : (list[0] ?? "")));
       })
       .catch(() => setError("Cannot reach the backend. Is it running?"));
-    fetch(`${API_BASE}/receipts/jobs?limit=15`)
+    fetch(`${API_BASE}/documents/jobs?limit=30`)
       .then((res) => res.json())
       .then(setJobs)
       .catch(() => undefined);
@@ -68,12 +71,13 @@ export const useReceiptUpload = () => {
     const selected = e.target.files;
     if (selected && selected.length > 0) {
       setFiles(Array.from(selected));
+      setAsOneDocument(false);
       setError(null);
       setRejected([]);
     }
   };
 
-  const uploadFiles = async (toUpload: File[]) => {
+  const uploadFiles = async (toUpload: File[], oneDocument = false) => {
     if (toUpload.length === 0 || !owner) return;
     setUploading(true);
     setError(null);
@@ -81,8 +85,9 @@ export const useReceiptUpload = () => {
     try {
       const formData = new FormData();
       formData.append("owner", owner);
+      formData.append("group", String(oneDocument && toUpload.length > 1));
       toUpload.forEach((file) => formData.append("files", file));
-      const res = await fetch(`${API_BASE}/receipts/upload`, { method: "POST", body: formData });
+      const res = await fetch(`${API_BASE}/documents/upload`, { method: "POST", body: formData });
       if (!res.ok) {
         const detail = await res.json().catch(() => null);
         throw new Error(detail?.detail ?? `Upload failed (status ${res.status})`);
@@ -90,6 +95,7 @@ export const useReceiptUpload = () => {
       const data: UploadResponse = await res.json();
       setRejected(data.rejected);
       setFiles([]);
+      setAsOneDocument(false);
       await refreshJobs();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
@@ -98,13 +104,15 @@ export const useReceiptUpload = () => {
     }
   };
 
-  const uploadReceipts = () => uploadFiles(files);
+  const uploadReceipts = () => uploadFiles(files, asOneDocument);
 
   return {
     files,
     owners,
     owner,
     setOwner,
+    asOneDocument,
+    setAsOneDocument,
     uploading,
     error,
     rejected,

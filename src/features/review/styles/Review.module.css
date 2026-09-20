@@ -1,0 +1,79 @@
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 0 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.intro {
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+}
+
+.kind {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.question {
+  font-size: 1rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.yes,
+.no {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: inherit;
+}
+
+.yes {
+  border-color: currentColor;
+}
+
+.yes:disabled,
+.no:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}

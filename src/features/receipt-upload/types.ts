@@ -6,8 +6,12 @@ export type JobStatus =
   | "duplicate"
   | "failed";
 
+// "auto" until Claude has read the document; then what it decided it is.
+export type DocumentKind = "auto" | "receipt" | "statement";
+
 export interface IngestJob {
   id: number;
+  kind: DocumentKind;
   owner: string;
   original_name: string;
   status: JobStatus;
