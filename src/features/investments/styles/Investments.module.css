@@ -1,0 +1,353 @@
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 0 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: opacity 0.15s ease;
+}
+
+/* The previous page stays on screen (dimmed) while the next one loads: no blank flash. */
+.dim {
+  opacity: 0.55;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.intro {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.tabOn {
+  border-color: currentColor;
+  font-weight: 600;
+}
+
+/* A small mark in the broker's chart colour: identity without colouring any text. */
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* One big number per page. */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0.25rem 0;
+}
+
+.heroLabel {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.heroValue {
+  font-size: clamp(2.5rem, 9vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.heroSub {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tileLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tileValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.tileSub {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.card {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cardWarn {
+  border-color: var(--warning-border);
+  background: var(--warning-subtle);
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.muted {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.hint {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 0.8125rem;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.legendKey {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.tooltip {
+  background: var(--surface);
+  border: 0.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--text-primary);
+}
+
+.tooltipTitle {
+  font-weight: 600;
+}
+
+.tooltipNote {
+  color: var(--text-secondary);
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tooltipKey {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.tooltipName {
+  color: var(--text-secondary);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  padding: 7px 10px;
+  text-align: right;
+  border-top: 0.5px solid var(--border);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-top: none;
+}
+
+.faded td {
+  color: var(--text-secondary);
+}
+
+.faded td[colspan] {
+  text-align: left;
+  font-style: italic;
+}
+
+.code {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.summaryRow::-webkit-details-marker {
+  display: none;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 0.875rem;
+}
+
+.listRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+
+.rowEnd {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.smallButton {
+  padding: 3px 10px;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.smallButton:hover {
+  color: var(--text-primary);
+  background: var(--surface-raised);
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  line-height: 1.6;
+}
+
+.notice {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  line-height: 1.5;
+}
+
+.noticeError {
+  border-color: var(--danger-border);
+  background: var(--danger-subtle);
+  color: var(--danger-text);
+}
+
+.two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1rem;
+}

@@ -6,6 +6,7 @@ import { StatementManagePage } from "./features/statement-manage/components/Stat
 import { InventoryPage } from "./features/inventory/components/InventoryPage";
 import { ReviewPage } from "./features/review/components/ReviewPage";
 import { SpendingPage } from "./features/spending/components/SpendingPage";
+import { InvestmentsPage } from "./features/investments/components/InvestmentsPage";
 import { CategoriesPage } from "./features/categories/components/CategoriesPage";
 import { InventoryAnalyticsDashboard } from "./features/inventory-analytics/components/InventoryAnalyticsDashboard";
 
@@ -21,6 +22,7 @@ export function App() {
           <Route path="/manage" element={<StatementManagePage />} />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/spending" element={<SpendingPage />} />
+          <Route path="/investments" element={<InvestmentsPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/questions" element={<ReviewPage />} />
           <Route path="/analytics" element={<InventoryAnalyticsDashboard />} />
