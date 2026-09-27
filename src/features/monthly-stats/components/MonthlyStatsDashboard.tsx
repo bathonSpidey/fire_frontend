@@ -7,6 +7,7 @@ import {
 } from "../lib/statsCalculation";
 import { groupCategoriesByType } from "../lib/categoryGrouping";
 import { useNetWorth } from "../hooks/useNetWorth";
+import { CashFlowChart } from "./CashFlowChart";
 import { FireCard } from "./FireCard";
 import { TrendIndicator } from "./TrendIndicator";
 import { CategoryDonutChart } from "./CategoryDonutChart";
@@ -194,6 +195,8 @@ export const MonthlyStatsDashboard: React.FC<DashboardProps> = ({
 
         {netWorth && <NetWorthCard netWorth={netWorth} />}
       </div>
+
+      <CashFlowChart stats={stats} />
 
       <div className={styles.splitView}>
         <div className={styles.metaCard}>

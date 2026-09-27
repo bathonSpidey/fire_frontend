@@ -294,3 +294,29 @@
     border: 0.5px solid var(--danger-border);
     border-radius: var(--radius-md);
 }
+.uploadBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-full);
+    border: 0.5px solid var(--border);
+    background-color: var(--surface-raised);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-all);
+}
+
+.uploadBtn:hover {
+    border-color: var(--border-strong);
+    background-color: var(--border);
+}
+
+.uploadBtnActive {
+    border-color: var(--primary-border);
+    background-color: var(--primary-subtle);
+    color: var(--primary-text);
+}

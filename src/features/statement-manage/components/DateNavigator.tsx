@@ -8,7 +8,17 @@ interface NavigatorProps {
   onNext: () => void;
   canGoNext: boolean;
   onYearChange: (year: number) => void;
+  uploadOpen: boolean;
+  onToggleUpload: () => void;
 }
+
+const UploadIcon: React.FC = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
 
 const ChevronLeft: React.FC = () => (
   <svg
@@ -55,6 +65,8 @@ export const DateNavigator: React.FC<NavigatorProps> = ({
   onNext,
   canGoNext,
   onYearChange,
+  uploadOpen,
+  onToggleUpload,
 }) => (
   <div className={styles.navigator}>
     <div className={styles.dateDisplay}>
@@ -78,17 +90,29 @@ export const DateNavigator: React.FC<NavigatorProps> = ({
       </button>
     </div>
 
-    <select
-      className={styles.yearSelect}
-      value={year}
-      onChange={(e) => onYearChange(Number(e.target.value))}
-      aria-label="Select year"
-    >
-      {AVAILABLE_YEARS.map((y) => (
-        <option key={y} value={y}>
-          {y}
-        </option>
-      ))}
-    </select>
+    <div className={styles.navigatorRight}>
+      <button
+        type="button"
+        className={`${styles.uploadBtn} ${uploadOpen ? styles.uploadBtnActive : ""}`}
+        onClick={onToggleUpload}
+        aria-pressed={uploadOpen}
+      >
+        <UploadIcon />
+        {uploadOpen ? "Hide upload" : "Upload"}
+      </button>
+
+      <select
+        className={styles.yearSelect}
+        value={year}
+        onChange={(e) => onYearChange(Number(e.target.value))}
+        aria-label="Select year"
+      >
+        {AVAILABLE_YEARS.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+    </div>
   </div>
 );

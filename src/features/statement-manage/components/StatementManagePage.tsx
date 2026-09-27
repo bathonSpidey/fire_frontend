@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useManageStatements } from "../hooks/useManageStatements";
 import { DateNavigator } from "./DateNavigator";
 import { ReceiptAccordion } from "./ReceiptAccordion";
@@ -34,6 +34,12 @@ export const StatementManagePage: React.FC = () => {
   const hasReceipts = receipts.length > 0;
   const showReceipts = activeBank === RECEIPTS_TAB || (activeBank === null && hasReceipts);
 
+  // The upload panel: a manual toggle, always available on top so no tab switch is needed, plus it
+  // opens on its own whenever the selected month has nothing recorded yet.
+  const [manualUpload, setManualUpload] = useState(false);
+  const isEmptyMonth = !loading && !error && statements.length === 0 && !hasReceipts;
+  const showUpload = manualUpload || isEmptyMonth;
+
   return (
     <div className={styles.viewWrapper}>
       <DateNavigator
@@ -43,7 +49,11 @@ export const StatementManagePage: React.FC = () => {
         onNext={handleNext}
         canGoNext={canGoNext}
         onYearChange={setYear}
+        uploadOpen={showUpload}
+        onToggleUpload={() => setManualUpload((v) => !v)}
       />
+
+      {showUpload && <UploadPage />}
 
       {/* Fully decoupled stats engine layer */}
       <MonthlyStatsContainer month={month} year={year} refreshKey={statsVersion} />
@@ -92,18 +102,15 @@ export const StatementManagePage: React.FC = () => {
                   )}
             </>
           ) : (
-            <div>
-              <div
-                className={styles.infoMessage}
-                style={{ paddingBottom: "16px" }}
-              >
-                Nothing recorded for{" "}
-                <strong>
-                  {month} {year}
-                </strong>{" "}
-                yet.
-              </div>
-              <UploadPage />
+            <div
+              className={styles.infoMessage}
+              style={{ paddingBottom: "16px" }}
+            >
+              Nothing recorded for{" "}
+              <strong>
+                {month} {year}
+              </strong>{" "}
+              yet.
             </div>
           )}
         </>
