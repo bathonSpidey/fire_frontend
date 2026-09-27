@@ -33,3 +33,42 @@ export interface MonthlyStatsWithTrend {
   current: MonthlyStatsResponse;
   previous: MonthlyStatsResponse | null;
 }
+
+// What the household has right now (not tied to the selected month).
+export interface NetWorthAccount {
+  bank: string;
+  balance: number | null; // null: no statement uploaded for this account yet
+  as_of: string | null; // the date this balance is from
+  stale: boolean | null; // null when balance is null
+}
+
+export interface NetWorthResponse {
+  accounts: NetWorthAccount[];
+  cash_total: number;
+  invested: number;
+  invested_note: string;
+  net_worth: number;
+  oldest_balance: string | null;
+  any_stale: boolean;
+}
+
+// The household's own definition of financial independence.
+export interface FireAdjustment {
+  id: number;
+  label: string;
+  amount: number; // can be negative
+  note: string | null;
+}
+
+export interface FireSummary {
+  settings: { target_monthly_spend: number; withdrawal_rate: number } | null; // null: not set yet
+  target_annual_spend: number | null;
+  fire_number: number | null;
+  net_worth: NetWorthResponse;
+  adjustments: FireAdjustment[];
+  adjustments_total: number;
+  combined_net_worth: number;
+  progress_pct: number | null;
+  pace: { monthly_average: number | null; months_used: number; note: string };
+  years_to_fire: number | null;
+}

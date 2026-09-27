@@ -11,10 +11,10 @@
     padding: 12px 0;
 }
 
-/* 4-Column Core KPI Grid */
+/* Core KPI grid: wraps cleanly whether there are 4 cards or 6 */
 .kpiGrid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
 }
 
@@ -238,4 +238,142 @@
     height: 100%;
     background-color: var(--ai-purple);
     border-radius: var(--radius-full);
+}
+/* FIRE number card */
+.fireCard {
+    background-color: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fireHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fireValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.fireSub {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.fireProgressTrack {
+    width: 100%;
+    height: 10px;
+    background-color: var(--surface-raised);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.fireProgressFill {
+    height: 100%;
+    background-color: var(--success-text);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+/* Small inline forms (settings, adjustments) */
+.form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.fieldLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.textInput,
+.select {
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background-color: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+    min-width: 0;
+}
+
+.primaryButton {
+    padding: 9px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--primary-border);
+    background: var(--primary-subtle);
+    color: var(--primary-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.smallButton {
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.smallButton:hover {
+    color: var(--text-primary);
+    background: var(--surface-raised);
+}
+
+.summaryRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    list-style: none;
+    flex-wrap: wrap;
+    font-size: 0.815rem;
+    color: var(--text-secondary);
+}
+
+.summaryRow::-webkit-details-marker {
+    display: none;
+}
+
+.adjustmentRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 0.875rem;
+    flex-wrap: wrap;
+}
+
+.adjustmentRow:last-of-type {
+    border-bottom: none;
 }

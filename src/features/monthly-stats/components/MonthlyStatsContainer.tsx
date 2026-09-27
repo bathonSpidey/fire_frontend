@@ -22,5 +22,5 @@ export const MonthlyStatsContainer: React.FC<ContainerProps> = ({
 
   if (error) return null; // Fail silently so it doesn't break the main statement view
 
-  return <MonthlyStatsDashboard stats={stats} previousStats={previousStats} />;
+  return <MonthlyStatsDashboard stats={stats} previousStats={previousStats} refreshKey={refreshKey} />;
 };
