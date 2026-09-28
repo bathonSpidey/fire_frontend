@@ -32,9 +32,11 @@ export interface MonthSpending {
   receipt_total: number;
   bank_only_total: number;
   previous_total: number;
+  fixed_total: number;
+  flexible_total: number;
   categories: SpendingCategory[];
   groups: { group: string; amount: number; share_pct: number }[];
-  owners: { owner: string; amount: number }[];
+  owners: { owner: string; amount: number; fixed: number; flexible: number }[];
   stores: { store: string; amount: number }[];
   receipts: { count: number; average_basket: number; discounts_saved: number };
   uncategorized: { entries: number; amount: number };

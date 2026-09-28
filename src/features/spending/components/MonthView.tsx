@@ -131,6 +131,16 @@ export const MonthView: React.FC<{ owner?: string }> = ({ owner = "" }) => {
               <span className={styles.kpiValue}>{euro(data.receipts.discounts_saved)}</span>
               <span className={styles.kpiSub}>Loyalty cards and offers on receipts</span>
             </div>
+            <div className={styles.kpi}>
+              <span className={styles.kpiLabel}>Fixed costs</span>
+              <span className={styles.kpiValue}>{euro(data.fixed_total)}</span>
+              <span className={styles.kpiSub}>Locked in regardless (rent, insurance, subscriptions)</span>
+            </div>
+            <div className={styles.kpi}>
+              <span className={styles.kpiLabel}>Flexible spending</span>
+              <span className={styles.kpiValue}>{euro(data.flexible_total)}</span>
+              <span className={styles.kpiSub}>The lever that is actually yours to pull</span>
+            </div>
           </div>
 
           {data.discrepancies.awaiting_statement && (
@@ -167,9 +177,14 @@ export const MonthView: React.FC<{ owner?: string }> = ({ owner = "" }) => {
                 <h2 className={styles.sectionTitle}>By person</h2>
                 <div className={styles.list}>
                   {data.owners.map((o) => (
-                    <div key={o.owner} className={styles.listRow}>
-                      <span>{o.owner}</span>
-                      <span className={styles.amount}>{euro(o.amount)}</span>
+                    <div key={o.owner} className={styles.listRow} style={{ flexDirection: "column", gap: 2 }}>
+                      <div className={styles.listRow} style={{ width: "100%" }}>
+                        <span>{o.owner}</span>
+                        <span className={styles.amount}>{euro(o.amount)}</span>
+                      </div>
+                      <span className={styles.muted} style={{ fontSize: "0.8125rem" }}>
+                        {euro(o.fixed)} fixed &middot; {euro(o.flexible)} flexible
+                      </span>
                     </div>
                   ))}
                 </div>
