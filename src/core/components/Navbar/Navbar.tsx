@@ -47,6 +47,9 @@ export const Navbar: React.FC = () => {
           <NavLink to="/analytics" className={getLinkClass}>
             Analytics
           </NavLink>
+          <NavLink to="/insights" className={getLinkClass}>
+            Insights
+          </NavLink>
         </div>
       </div>
 

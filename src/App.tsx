@@ -9,6 +9,7 @@ import { SpendingPage } from "./features/spending/components/SpendingPage";
 import { InvestmentsPage } from "./features/investments/components/InvestmentsPage";
 import { CategoriesPage } from "./features/categories/components/CategoriesPage";
 import { InventoryAnalyticsDashboard } from "./features/inventory-analytics/components/InventoryAnalyticsDashboard";
+import { InsightsPage } from "./features/insights/components/InsightsPage";
 
 export function App() {
   return (
@@ -26,6 +27,7 @@ export function App() {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/questions" element={<ReviewPage />} />
           <Route path="/analytics" element={<InventoryAnalyticsDashboard />} />
+          <Route path="/insights" element={<InsightsPage />} />
           <Route path="*" element={<Navigate to="/manage" />} />
         </Routes>
       </main>
