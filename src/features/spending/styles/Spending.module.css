@@ -42,6 +42,7 @@
   padding: 1rem 1.25rem;
   border-radius: var(--radius-lg);
   border: 0.5px solid var(--border);
+  border-left: 3px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -104,10 +105,126 @@
   gap: 10px;
 }
 
-.groupHeader {
+/* ── collapsible category-group cards (native <details>, no JS state) ──────────────────────── */
+
+.groupCard {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.groupSummary {
+  cursor: pointer;
+  padding: 0.9rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+}
+
+.groupSummary::-webkit-details-marker {
+  display: none;
+}
+
+.groupAccent {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.groupName {
+  font-weight: 600;
+  flex: 1;
+}
+
+.groupBarTrack {
+  width: 80px;
+  height: 6px;
+  border-radius: 4px;
+  background: var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: none;
+}
+
+@media (min-width: 560px) {
+  .groupBarTrack {
+    display: block;
+  }
+}
+
+.groupBarFill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.groupMeta {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.groupChevron {
+  flex-shrink: 0;
+  display: flex;
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+}
+
+.groupCard[open] .groupChevron {
+  transform: rotate(180deg);
+}
+
+.categoryList {
+  padding: 0 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fixedBadge {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-left: 6px;
+}
+
+/* ── highlights: the biggest moves vs last month, before any digging ───────────────────────── */
+
+.highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.highlightCard {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  border-left: 3px solid transparent;
   display: flex;
   justify-content: space-between;
-  font-weight: 600;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.highlightUp {
+  border-left-color: var(--danger-text);
+}
+
+.highlightUp strong {
+  color: var(--danger-text);
+}
+
+.highlightDown {
+  border-left-color: var(--success-text);
+}
+
+.highlightDown strong {
+  color: var(--success-text);
 }
 
 .row {
@@ -140,12 +257,21 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  color: var(--text-primary);
 }
 
 .delta {
   font-size: 0.75rem;
   color: var(--text-secondary);
   margin-left: 6px;
+}
+
+.deltaUp {
+  color: var(--danger-text);
+}
+
+.deltaDown {
+  color: var(--success-text);
 }
 
 .legend {
