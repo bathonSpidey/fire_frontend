@@ -53,7 +53,7 @@ const SettingsForm: React.FC<{ actions: Actions; initial?: { target_monthly_spen
         )}
       </div>
       <button type="submit" className={styles.primaryButton}>
-        {initial ? "Save" : "Set my target"}
+        {initial ? "Save" : "Set target"}
       </button>
     </form>
   );
@@ -153,11 +153,11 @@ export const FireCard: React.FC<{ refreshKey?: number }> = ({ refreshKey }) => {
     return (
       <div className={styles.fireCard}>
         <h2 className={styles.fireValue} style={{ fontSize: "1.1rem" }}>
-          What does financial freedom look like for you?
+          What does financial freedom look like for your household?
         </h2>
         <p className={styles.fireSub}>
           Set the monthly cost of the life you actually want — not today's spending, the steady-state simple life — and a
-          withdrawal rate, and this turns into your FIRE number.
+          withdrawal rate, and this turns into your household's FIRE number.
         </p>
         {error && <div className={styles.fireSub}>{error}</div>}
         <SettingsForm actions={actions} />
@@ -172,7 +172,7 @@ export const FireCard: React.FC<{ refreshKey?: number }> = ({ refreshKey }) => {
     <div className={styles.fireCard}>
       <div className={styles.fireHead}>
         <div>
-          <span className={styles.label}>Your FIRE number</span>
+          <span className={styles.label}>Household FIRE number</span>
           <div className={styles.fireValue}>{euro0(fire_number ?? 0)}</div>
         </div>
         <button type="button" className={styles.smallButton} onClick={() => setEditingTarget(!editingTarget)}>

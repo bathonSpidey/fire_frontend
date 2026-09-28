@@ -67,11 +67,11 @@ const Groups: React.FC<{ data: MonthSpending }> = ({ data }) => {
   );
 };
 
-export const MonthView: React.FC = () => {
+export const MonthView: React.FC<{ owner?: string }> = ({ owner = "" }) => {
   const {
     month, year, data, loading, error, recheckMessage, canGoNext,
     handlePrev, handleNext, categorizeUncategorized,
-  } = useSpending();
+  } = useSpending(owner);
 
   return (
     <div className={styles.stack}>
@@ -162,17 +162,19 @@ export const MonthView: React.FC = () => {
           <Groups data={data} />
 
           <div className={styles.twoCol}>
-            <div className={styles.group}>
-              <h2 className={styles.sectionTitle}>By person</h2>
-              <div className={styles.list}>
-                {data.owners.map((o) => (
-                  <div key={o.owner} className={styles.listRow}>
-                    <span>{o.owner}</span>
-                    <span className={styles.amount}>{euro(o.amount)}</span>
-                  </div>
-                ))}
+            {!owner && (
+              <div className={styles.group}>
+                <h2 className={styles.sectionTitle}>By person</h2>
+                <div className={styles.list}>
+                  {data.owners.map((o) => (
+                    <div key={o.owner} className={styles.listRow}>
+                      <span>{o.owner}</span>
+                      <span className={styles.amount}>{euro(o.amount)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             <div className={styles.group}>
               <h2 className={styles.sectionTitle}>Top stores</h2>
               <div className={styles.list}>

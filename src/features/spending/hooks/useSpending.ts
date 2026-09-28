@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { API_BASE } from "../../../core/api";
 import type { MonthSpending } from "../types";
 
-export const useSpending = () => {
+export const useSpending = (owner: string = "") => {
   const now = new Date();
   const [month, setMonth] = useState<number>(now.getMonth() + 1);
   const [year, setYear] = useState<number>(now.getFullYear());
@@ -18,7 +18,8 @@ export const useSpending = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE}/spending/month?year=${year}&month=${month}`);
+        const ownerParam = owner ? `&owner=${encodeURIComponent(owner)}` : "";
+        const res = await fetch(`${API_BASE}/spending/month?year=${year}&month=${month}${ownerParam}`);
         if (!res.ok) throw new Error(`Server returned status ${res.status}`);
         const json: MonthSpending = await res.json();
         if (!cancelled) setData(json);
@@ -32,7 +33,7 @@ export const useSpending = () => {
     return () => {
       cancelled = true;
     };
-  }, [year, month, reloadKey]);
+  }, [year, month, reloadKey, owner]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 

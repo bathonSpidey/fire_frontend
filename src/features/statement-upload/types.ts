@@ -11,9 +11,14 @@ export interface BankTransaction {
 }
 
 export interface BankStatementResponse {
+  id: number;
   month: string;
   year: number;
   bank: string;
+  owner: string | null; // more than one person can have a statement at the same bank
+  account_number: string | null; // IBAN or account number; tells apart two accounts at the same bank
+  status: "ok" | "needs_review";
+  review_note: string | null;
   starting_balance: number;
   closing_balance: number;
   transactions: BankTransaction[];

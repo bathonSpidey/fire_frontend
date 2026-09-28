@@ -4,7 +4,7 @@ import type { Pace, Trends } from "../types";
 
 const DEFAULT_PICKS = 4;
 
-export const useTrends = () => {
+export const useTrends = (owner: string = "") => {
   const [months, setMonths] = useState(6);
   const [trends, setTrends] = useState<Trends | null>(null);
   const [pace, setPace] = useState<Pace | null>(null);
@@ -15,9 +15,10 @@ export const useTrends = () => {
   useEffect(() => {
     let cancelled = false;
     const now = new Date(); // the old chart stays visible while another period loads
+    const ownerParam = owner ? `&owner=${encodeURIComponent(owner)}` : "";
     Promise.all([
-      fetch(`${API_BASE}/spending/trends?months=${months}`),
-      fetch(`${API_BASE}/spending/pace?year=${now.getFullYear()}&month=${now.getMonth() + 1}`),
+      fetch(`${API_BASE}/spending/trends?months=${months}${ownerParam}`),
+      fetch(`${API_BASE}/spending/pace?year=${now.getFullYear()}&month=${now.getMonth() + 1}${ownerParam}`),
     ])
       .then(async ([t, p]) => {
         if (!t.ok || !p.ok) throw new Error(`Server returned status ${t.ok ? p.status : t.status}`);
@@ -34,7 +35,7 @@ export const useTrends = () => {
     return () => {
       cancelled = true;
     };
-  }, [months]);
+  }, [months, owner]);
 
   // Until the household chooses, compare the biggest flexible categories (rent would swamp the rest).
   const defaults = (trends?.categories ?? []).filter((c) => !c.fixed).slice(0, DEFAULT_PICKS).map((c) => c.key);

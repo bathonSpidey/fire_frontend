@@ -166,8 +166,8 @@ const CategoryTable: React.FC<{ trends: Trends }> = ({ trends }) => {
   );
 };
 
-export const CompareView: React.FC = () => {
-  const { months, setMonths, trends, pace, chosen, toggle, loading, error } = useTrends();
+export const CompareView: React.FC<{ owner?: string }> = ({ owner = "" }) => {
+  const { months, setMonths, trends, pace, chosen, toggle, loading, error } = useTrends(owner);
 
   if (loading && !trends) return <div className={styles.empty}>Loading...</div>;
   if (error) return <div className={`${styles.notice} ${styles.noticeError}`}>{error}</div>;

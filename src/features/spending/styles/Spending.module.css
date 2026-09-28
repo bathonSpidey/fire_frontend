@@ -202,6 +202,14 @@
   gap: 1.25rem;
 }
 
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .tabs {
   display: flex;
   gap: 8px;
@@ -220,5 +228,27 @@
 
 .tabOn {
   border-color: currentColor;
+  font-weight: 600;
+}
+
+.ownerFilter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ownerChip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+
+.ownerChipOn {
+  border-color: currentColor;
+  color: var(--text-primary);
   font-weight: 600;
 }

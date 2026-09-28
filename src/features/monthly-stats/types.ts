@@ -37,6 +37,8 @@ export interface MonthlyStatsWithTrend {
 // What the household has right now (not tied to the selected month).
 export interface NetWorthAccount {
   bank: string;
+  owner: string | null; // more than one household member can bank at the same place
+  account_number: string | null; // one owner can have more than one account at the same bank
   balance: number | null; // null: no statement uploaded for this account yet
   as_of: string | null; // the date this balance is from
   stale: boolean | null; // null when balance is null

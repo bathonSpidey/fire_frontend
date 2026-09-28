@@ -9,7 +9,9 @@ export const useManageStatements = () => {
   const [month, setMonth] = useState<string>(initial.month);
   const [year, setYear] = useState<number>(initial.year);
   const [statements, setStatements] = useState<BankStatementResponse[]>([]);
-  const [activeBank, setActiveBank] = useState<string | null>(null);
+  // The statement's id, not its bank: two owners can each have a statement at the same bank in the
+  // same month, so "Sparkasse" alone can no longer tell two tabs apart.
+  const [activeId, setActiveId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -29,12 +31,12 @@ export const useManageStatements = () => {
         const data: BankStatementResponse[] = await res.json();
         
         setStatements(data);
-        // Default to first active bank if present
-        setActiveBank(data.length > 0 ? data[0].bank : null);
+        // Default to the first statement, if any.
+        setActiveId(data.length > 0 ? data[0].id : null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown network error');
         setStatements([]);
-        setActiveBank(null);
+        setActiveId(null);
       } finally {
         setLoading(false);
       }
@@ -128,12 +130,12 @@ export const useManageStatements = () => {
     }
   };
 
-  const selectedStatement = statements.find((s) => s.bank === activeBank) || null;
+  const selectedStatement = statements.find((s) => s.id === activeId) || null;
 
   return {
     month, year, setYear: changeYear, canGoNext,
     receipts, changeItemCategory,
-    statements, activeBank, setActiveBank,
+    statements, activeId, setActiveId,
     selectedStatement, loading, error,
     saveError, statsVersion, changeCategory,
     handlePrev, handleNext

@@ -45,7 +45,11 @@ export const StatementAccordion: React.FC<Props> = ({ statement, onCategoryChang
         aria-expanded={isOpen}
       >
         <div className={styles.accordionMeta}>
-          <span className={styles.accordionTitle}>{statement.bank}</span>
+          <span className={styles.accordionTitle}>
+            {statement.bank}
+            {statement.owner ? ` — ${statement.owner}` : ""}
+            {statement.account_number ? ` (...${statement.account_number.slice(-4)})` : ""}
+          </span>
           <span className={styles.accordionSub}>
             {statement.transactions.length} transactions
           </span>
@@ -74,6 +78,10 @@ export const StatementAccordion: React.FC<Props> = ({ statement, onCategoryChang
           </span>
         </div>
       </button>
+
+      {statement.status === "needs_review" && statement.review_note && (
+        <div className={styles.reviewNote}>Please check: {statement.review_note}</div>
+      )}
 
       {isOpen && (
         <div className={styles.accordionContent}>

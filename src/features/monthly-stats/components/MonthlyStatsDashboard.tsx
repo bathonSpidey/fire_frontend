@@ -1,5 +1,5 @@
 import React from "react";
-import type { MonthlyStatsResponse, NetWorthResponse } from "../types";
+import type { MonthlyStatsResponse, NetWorthAccount, NetWorthResponse } from "../types";
 import {
   calculateTrend,
   formatEuro,
@@ -61,6 +61,21 @@ const SourceNote: React.FC<{ stats: MonthlyStatsResponse }> = ({ stats }) => {
   );
 };
 
+// A bank name alone stops being enough once more than one real account sits behind it: first the
+// owner (two household members can bank at the same place), then the account itself (one owner can
+// have more than one account at the same bank).
+const accountLabel = (account: NetWorthAccount, all: NetWorthAccount[]): string => {
+  const sameBank = all.filter((a) => a.bank === account.bank);
+  if (sameBank.length <= 1) return account.bank;
+  const extras: string[] = [];
+  if (account.owner) extras.push(account.owner);
+  const sameOwnerToo = sameBank.filter((a) => a.owner === account.owner).length > 1;
+  if (sameOwnerToo && account.account_number) extras.push(`...${account.account_number.slice(-4)}`);
+  return extras.length > 0 ? `${account.bank} (${extras.join(", ")})` : account.bank;
+};
+
+const accountKey = (a: NetWorthAccount): string => `${a.bank}|${a.owner ?? ""}|${a.account_number ?? ""}`;
+
 // What the household has right now: cash per account plus invested at cost. Not month-scoped, so it
 // does not change when the date navigator moves — only when a newer statement is uploaded.
 const NetWorthCard: React.FC<{ netWorth: NetWorthResponse }> = ({ netWorth }) => {
@@ -70,7 +85,7 @@ const NetWorthCard: React.FC<{ netWorth: NetWorthResponse }> = ({ netWorth }) =>
       <span className={styles.label}>Net worth</span>
       <span className={`${styles.value} ${styles.positive}`}>{formatEuro(netWorth.net_worth)}</span>
       <Hint>
-        {known.map((a) => `${a.bank} ${formatEuro(a.balance ?? 0)}`).join(" + ")}
+        {known.map((a) => `${accountLabel(a, netWorth.accounts)} ${formatEuro(a.balance ?? 0)}`).join(" + ")}
         {known.length > 0 ? " + " : ""}
         {formatEuro(netWorth.invested)} invested (at cost, not market value).
         {netWorth.oldest_balance &&
@@ -84,9 +99,9 @@ const NetWorthDetail: React.FC<{ netWorth: NetWorthResponse }> = ({ netWorth }) 
   <div className={styles.metaCard}>
     <h3 className={styles.sectionTitle}>Net worth by account</h3>
     {netWorth.accounts.map((a) => (
-      <div className={styles.infoRow} key={a.bank}>
+      <div className={styles.infoRow} key={accountKey(a)}>
         <span className={styles.infoLabel}>
-          {a.bank}
+          {accountLabel(a, netWorth.accounts)}
           {a.as_of && (
             <span style={{ color: a.stale ? "var(--warning-text)" : "var(--text-secondary)" }}>
               {" "}
@@ -150,7 +165,7 @@ export const MonthlyStatsDashboard: React.FC<DashboardProps> = ({
             {formatEuro(stats.gross_income)}
           </span>
           {incomeTrend && <TrendIndicator trend={incomeTrend} />}
-          <Hint>Money that arrived: salary, refunds, money from friends. Moves between your own accounts do not count.</Hint>
+          <Hint>Money that arrived: salary, refunds, money from friends. Moves between the household's own accounts do not count.</Hint>
         </div>
 
         <div className={styles.kpiCard}>
